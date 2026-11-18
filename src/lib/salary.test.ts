@@ -40,9 +40,9 @@ describe('calculateSalary', () => {
     const r = calculateSalary(base);
     expect(r.monthlyGross).toBe(3_333_333);
     expect(r.monthlyTaxable).toBe(3_133_333);
-    expect(r.pension).toBe(140_990); // 3,133,333 x 4.5% 절사
-    expect(r.health).toBe(111_070); // x 3.545%
-    expect(r.longTermCare).toBe(14_380); // 건보료 x 12.95%
+    expect(r.pension).toBe(148_830); // 3,133,333 x 4.75% 절사
+    expect(r.health).toBe(112_640); // x 3.595%
+    expect(r.longTermCare).toBe(14_800); // 건보료 x 13.14%
     expect(r.employment).toBe(28_190); // x 0.9%
   });
 
@@ -75,7 +75,7 @@ describe('calculateSalary', () => {
 
   it('국민연금 상한 적용 (고연봉)', () => {
     const r = calculateSalary({ ...base, annualSalary: 200_000_000 });
-    expect(r.pension).toBe(286_650); // 6,370,000 x 4.5%
+    expect(r.pension).toBe(313_020); // 6,590,000 x 4.75%
   });
 
   it('연봉 0 이면 모든 값 0', () => {
