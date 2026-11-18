@@ -1,0 +1,11 @@
+---
+/**
+ * 광고 자리 (현재 비어 있음). 애드센스 승인 후 이 컴포넌트 안에만 광고 코드를 넣는다.
+ * 지금은 어떤 내용도 렌더링하지 않는다.
+ */
+interface Props {
+  position?: 'top' | 'inline' | 'bottom';
+}
+const { position = 'inline' } = Astro.props;
+---
+<div class="ad-slot" data-ad-position={position} aria-hidden="true"></div>

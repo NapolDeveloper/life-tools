@@ -1,0 +1,18 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import ToolCard from '../components/ToolCard.astro';
+import { SITE_NAME, SITE_TAGLINE, TOOLS } from '../config';
+---
+<BaseLayout title={SITE_NAME} description={`${SITE_NAME}: ${SITE_TAGLINE}. 연봉 실수령액 계산기 등 생활에 필요한 계산을 회원가입 없이 바로 해보세요.`}>
+  <h1>{SITE_NAME}</h1>
+  <p class="lead">{SITE_TAGLINE}. 회원가입 없이, 입력한 값은 내 브라우저 안에서만 계산돼요.</p>
+  <h2 id="tools">도구 목록</h2>
+  <div class="tool-grid">
+    {TOOLS.map((t) => <ToolCard tool={t} />)}
+  </div>
+  <h2>이 사이트는 이렇게 만들어요</h2>
+  <p>
+    각 도구에는 사용법, 계산 방식, 예시, 자주 묻는 질문을 함께 적어 두었어요. 어떤 기준으로 숫자가 나왔는지 직접 확인할 수 있도록
+    요율과 기준 연도를 공개하고, 바뀌는 값은 확인하는 대로 갱신합니다.
+  </p>
+</BaseLayout>
