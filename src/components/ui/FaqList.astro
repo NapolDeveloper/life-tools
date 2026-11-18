@@ -1,0 +1,19 @@
+---
+/** 자주 묻는 질문 (4~6개). 네이티브 details/summary. */
+interface Props { items: { q: string; a: string }[] }
+const { items } = Astro.props;
+---
+<div class="faq">
+  {items.map((f) => (
+    <details>
+      <summary>{f.q}</summary>
+      <p>{f.a}</p>
+    </details>
+  ))}
+</div>
+<style>
+  details { background: var(--color-surface); border: 1px solid var(--color-border); border-radius: var(--radius-md); margin-bottom: var(--space-2); }
+  summary { min-height: var(--touch-min); padding: var(--space-3) var(--space-4); font-weight: 600; cursor: pointer; display: flex; align-items: center; }
+  details[open] summary { border-bottom: 1px solid var(--color-border); }
+  p { margin: 0; padding: var(--space-3) var(--space-4); }
+</style>

@@ -1,6 +1,6 @@
 ---
 import BaseLayout from '../../layouts/BaseLayout.astro';
-import AdSlot from '../../components/AdSlot.astro';
+import AdSlot from '../../components/ui/AdSlot.astro';
 import { SITE_NAME, SITE_URL } from '../../config';
 import { calculateSalary } from '../../lib/salary';
 import { PAYROLL_BASE_YEAR, PENSION, HEALTH, LONG_TERM_CARE, EMPLOYMENT } from '../../data/payroll';
@@ -73,7 +73,7 @@ const jsonLd = [
   },
 ];
 ---
-<BaseLayout title={title} description={description} jsonLd={jsonLd}>
+<BaseLayout title={title} description={description} jsonLd={jsonLd} breadcrumbs={[{ name: '급여', href: '/pay/' }, { name: title }]}>
   <h1>{title}</h1>
   <p class="lead">세전 연봉에서 4대보험과 소득세를 빼고 나면 매달 얼마가 통장에 들어오는지 계산해 보세요.</p>
 
@@ -134,7 +134,7 @@ const jsonLd = [
     </p>
   </section>
 
-  <AdSlot position="inline" />
+  <AdSlot />
 
   <h2>사용법</h2>
   <ol>

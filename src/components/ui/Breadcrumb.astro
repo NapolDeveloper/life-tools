@@ -1,0 +1,24 @@
+---
+import ChevronRight from '../icons/ChevronRight.astro';
+export interface Crumb { name: string; href?: string }
+interface Props { items: Crumb[] }
+const { items } = Astro.props;
+---
+<nav class="breadcrumb" aria-label="현재 위치">
+  <ol>
+    {items.map((c, i) => (
+      <li>
+        {c.href && i < items.length - 1 ? <a href={c.href}>{c.name}</a> : <span aria-current="page">{c.name}</span>}
+        {i < items.length - 1 && <ChevronRight />}
+      </li>
+    ))}
+  </ol>
+</nav>
+<style>
+  .breadcrumb { margin-bottom: var(--space-3); }
+  ol { list-style: none; display: flex; flex-wrap: wrap; align-items: center; gap: 0 var(--space-1); margin: 0; padding: 0; font-size: var(--text-small); line-height: var(--text-small-lh); }
+  li { display: inline-flex; align-items: center; gap: var(--space-1); margin: 0; color: var(--color-text-muted); }
+  a { display: inline-flex; align-items: center; min-height: var(--touch-sm); color: var(--color-text-muted); }
+  a:hover { color: var(--color-primary); }
+  [aria-current='page'] { color: var(--color-text); font-weight: 600; }
+</style>

@@ -1,0 +1,26 @@
+---
+/**
+ * 모바일 하단 고정 미니 결과바. 핵심 결과가 화면 밖으로 나가면 스크립트가 보여 준다(768px 이상에서는 항상 숨김).
+ * 같은 값을 결과 카드에서 이미 알리므로 스크린리더에는 숨긴다.
+ */
+interface Props { label: string; value: string; out?: string }
+const { label, value, out = 'sticky' } = Astro.props;
+---
+<div class="bar" data-sticky-bar aria-hidden="true">
+  <span class="label">{label}</span>
+  <strong class="value num" data-out={out}>{value}</strong>
+</div>
+<style>
+  .bar {
+    position: fixed; left: 0; right: 0; bottom: 0; z-index: 20;
+    display: flex; align-items: center; justify-content: space-between; gap: var(--space-3);
+    min-height: var(--touch-min); padding: var(--space-3) var(--gutter);
+    background: var(--color-surface); border-top: 1px solid var(--color-border); box-shadow: var(--shadow-sticky);
+    transform: translateY(100%); visibility: hidden;
+    transition: transform var(--duration-base), visibility var(--duration-base);
+  }
+  .bar.show { transform: translateY(0); visibility: visible; }
+  .label { font-size: var(--text-small); color: var(--color-text-muted); }
+  .value { font-size: var(--text-h2); color: var(--color-primary); }
+  @media (min-width: 768px) { .bar { display: none; } }
+</style>

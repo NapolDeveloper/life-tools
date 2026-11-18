@@ -1,0 +1,20 @@
+---
+/**
+ * 입력 한 칸: label + (입력 slot) + 힌트 + 오류. 오류 요소는 JS가 채우고 입력의 aria-describedby로 연결한다.
+ * 입력 요소는 같은 id를 쓰고 aria-describedby="{id}-hint {id}-error"를 달아 준다.
+ */
+interface Props { id: string; label: string; hint?: string }
+const { id, label, hint } = Astro.props;
+---
+<div class="field">
+  <label for={id}>{label}</label>
+  <slot />
+  {hint && <p class="hint" id={`${id}-hint`}>{hint}</p>}
+  <p class="error" id={`${id}-error`} hidden></p>
+</div>
+<style>
+  .field { margin-bottom: var(--space-4); }
+  label { display: block; font-weight: 600; margin-bottom: var(--space-1); }
+  .hint { margin: var(--space-1) 0 0; font-size: var(--text-small); line-height: var(--text-small-lh); color: var(--color-text-muted); }
+  .error { margin: var(--space-1) 0 0; font-size: var(--text-small); color: var(--color-danger); font-weight: 600; }
+</style>

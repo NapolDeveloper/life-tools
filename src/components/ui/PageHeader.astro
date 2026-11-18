@@ -1,0 +1,15 @@
+---
+/** H1 + 한 줄 설명 + (선택) 최종 갱신일 */
+interface Props { title: string; description?: string; updated?: string }
+const { title, description, updated } = Astro.props;
+---
+<header class="page-header prose">
+  <h1>{title}</h1>
+  {description && <p class="lead">{description}</p>}
+  {updated && <p class="meta small muted">최종 갱신일 <time datetime={updated}>{updated}</time></p>}
+</header>
+<style>
+  .page-header { margin-bottom: var(--space-5); }
+  .lead { margin: var(--space-2) 0 0; color: var(--color-text-muted); }
+  .meta { margin: var(--space-2) 0 0; }
+</style>

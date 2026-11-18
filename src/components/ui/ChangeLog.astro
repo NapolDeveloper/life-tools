@@ -1,0 +1,16 @@
+---
+/** 변경 이력: 날짜·내용 (site-00 §3 오류 신고 처리 기록). 최신순으로 넘긴다. */
+interface Props { items: { date: string; text: string }[] }
+const { items } = Astro.props;
+---
+<ul class="log">
+  {items.map((i) => (
+    <li><time datetime={i.date}>{i.date}</time><span>{i.text}</span></li>
+  ))}
+</ul>
+<style>
+  .log { list-style: none; margin: 0 0 var(--space-4); padding: 0; border-top: 1px solid var(--color-border); }
+  li { display: grid; grid-template-columns: 7.5rem 1fr; gap: var(--space-3); margin: 0; padding: var(--space-3) 0; border-bottom: 1px solid var(--color-border); font-size: var(--text-small); }
+  time { color: var(--color-text-muted); font-variant-numeric: tabular-nums; }
+  @media (max-width: 480px) { li { grid-template-columns: 1fr; gap: var(--space-1); } }
+</style>

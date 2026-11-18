@@ -1,0 +1,21 @@
+---
+import ChevronDown from '../icons/ChevronDown.astro';
+/** 접기·펼치기 (상세 옵션 등). 네이티브 details/summary라 키보드·스크린리더 기본 지원. */
+interface Props { summary: string; open?: boolean }
+const { summary, open = false } = Astro.props;
+---
+<details class="details" open={open}>
+  <summary><span>{summary}</span><ChevronDown /></summary>
+  <div class="body"><slot /></div>
+</details>
+<style>
+  .details { border: 1px solid var(--color-border); border-radius: var(--radius-md); background: var(--color-surface); margin-bottom: var(--space-4); }
+  summary {
+    display: flex; align-items: center; justify-content: space-between; gap: var(--space-2);
+    min-height: var(--touch-min); padding: var(--space-2) var(--space-4); font-weight: 600; cursor: pointer; list-style: none;
+  }
+  summary::-webkit-details-marker { display: none; }
+  summary :global(svg) { transition: transform var(--duration-fast); color: var(--color-text-muted); }
+  .details[open] summary :global(svg) { transform: rotate(180deg); }
+  .body { padding: var(--space-2) var(--space-4) var(--space-1); border-top: 1px solid var(--color-border); padding-top: var(--space-4); }
+</style>

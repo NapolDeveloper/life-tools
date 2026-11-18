@@ -1,0 +1,22 @@
+---
+import ToolCard from './ToolCard.astro';
+import { TOOLS, getCategory, type CategorySlug } from '../../config';
+/** 관련 도구(같은 카테고리 3~4개). 도구가 부족하면 있는 만큼만 보여 주고 허브 링크로 이어 준다. */
+interface Props { category: CategorySlug; current: string }
+const { category, current } = Astro.props;
+const related = TOOLS.filter((t) => t.category === category && t.slug !== current).slice(0, 4);
+const cat = getCategory(category);
+---
+<div class="related">
+  {related.length > 0 && (
+    <div class="grid">{related.map((t) => <ToolCard tool={t} />)}</div>
+  )}
+  <p>
+    {related.length === 0 && '같은 분야의 다른 계산기는 준비 중이에요. '}
+    <a href={`/${cat.slug}/`}>{cat.name} 계산기 모음</a>에서 더 많은 계산기를 확인해 보세요.
+  </p>
+</div>
+<style>
+  .grid { display: grid; gap: var(--space-3); grid-template-columns: 1fr; margin-bottom: var(--space-4); }
+  @media (min-width: 768px) { .grid { grid-template-columns: 1fr 1fr; } }
+</style>
