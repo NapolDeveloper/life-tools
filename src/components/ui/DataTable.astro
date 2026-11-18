@@ -1,5 +1,5 @@
 ---
-/** 일반 데이터 표. caption·th scope 필수, 모바일에서는 래퍼 안에서만 가로 스크롤. */
+/** 일반 데이터 표. caption·th scope 필수. 행 구분선 없이 surface-sub 면 위에 놓고, 모바일에서는 래퍼 안에서만 가로 스크롤. */
 export interface Column { key: string; label: string; align?: 'left' | 'right' }
 interface Props { caption: string; columns: Column[]; rows: Record<string, string>[]; rowHeader?: boolean }
 const { caption, columns, rows, rowHeader = true } = Astro.props;
@@ -26,11 +26,12 @@ const { caption, columns, rows, rowHeader = true } = Astro.props;
   </table>
 </div>
 <style>
-  .table-scroll { overflow-x: auto; border: 1px solid var(--color-border); border-radius: var(--radius-md); background: var(--color-surface); margin-bottom: var(--space-4); }
-  table { width: 100%; border-collapse: collapse; font-size: var(--text-small); min-width: 20rem; }
-  caption { text-align: left; padding: var(--space-3) var(--space-4); color: var(--color-text-muted); caption-side: top; }
-  th, td { padding: var(--space-3) var(--space-4); border-top: 1px solid var(--color-border); text-align: left; vertical-align: top; }
-  thead th { background: var(--color-surface-2); font-weight: 600; }
+  .table-scroll { overflow-x: auto; background: var(--color-surface-sub); border-radius: var(--radius-lg); padding: var(--space-2) var(--space-4); margin-bottom: var(--space-4); }
+  table { width: 100%; border-collapse: collapse; font-size: var(--fs-body-2); line-height: var(--lh-body-2); min-width: 20rem; }
+  caption { text-align: left; padding: var(--space-3) 0 var(--space-2); color: var(--color-text-sub); caption-side: top; }
+  th, td { padding: var(--space-3) var(--space-2) var(--space-3) 0; text-align: left; vertical-align: top; border: 0; }
+  thead th { font-size: var(--fs-caption); line-height: var(--lh-caption); font-weight: 400; color: var(--color-text-tertiary); padding-top: var(--space-1); padding-bottom: var(--space-1); }
   tbody th { font-weight: 600; }
+  td:last-child, th:last-child { padding-right: 0; }
   .r { text-align: right; }
 </style>

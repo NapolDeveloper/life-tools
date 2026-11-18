@@ -3,7 +3,7 @@ import Field from './Field.astro';
 import { num, koreanAmount } from '../../lib/format';
 /**
  * 금액 입력. type="text" + inputmode="numeric", 천 단위 콤마(JS), 단위 고정 표시, 아래에 한글 읽기.
- * slot에는 빠른 입력 칩(Chips)을 넣는다.
+ * 테두리 없는 bg-sub 면, 포커스 시 2px primary 링. slot에는 빠른 입력 칩(Chips)을 넣는다.
  */
 interface Props { id: string; name?: string; label: string; value: number; unit?: string; hint?: string }
 const { id, name = id, label, value, unit = '원', hint } = Astro.props;
@@ -26,15 +26,14 @@ const { id, name = id, label, value, unit = '원', hint } = Astro.props;
   <slot />
 </Field>
 <style>
-  .control { position: relative; }
+  .control { position: relative; border-radius: var(--radius-md); background: var(--color-bg-sub); }
+  .control:focus-within { outline: 2px solid var(--color-primary); outline-offset: 0; }
+  .control:has(input[aria-invalid='true']) { outline: 2px solid var(--color-danger); outline-offset: 0; }
   input {
-    width: 100%; min-height: var(--touch-min); padding: 0 calc(var(--space-6) + var(--space-2)) 0 var(--space-3);
-    background: var(--color-surface); color: var(--color-text);
-    border: 1px solid var(--color-border-strong); border-radius: var(--radius-sm);
-    font-size: max(1rem, var(--text-body)); font-variant-numeric: tabular-nums; text-align: right;
+    width: 100%; height: var(--btn-l); padding: 0 calc(var(--space-9) + var(--space-1)) 0 var(--space-4);
+    background: transparent; color: var(--color-text); border: 0; border-radius: var(--radius-md); outline: 0;
+    font-size: var(--fs-body-1); font-weight: 600; font-variant-numeric: tabular-nums; text-align: right;
   }
-  input:hover { border-color: var(--color-primary); }
-  input[aria-invalid='true'] { border-color: var(--color-danger); border-width: 2px; }
-  .unit { position: absolute; right: var(--space-3); top: 50%; transform: translateY(-50%); color: var(--color-text-muted); pointer-events: none; }
-  .reading { margin: var(--space-1) 0 var(--space-2); font-size: var(--text-small); color: var(--color-primary); font-weight: 600; text-align: right; min-height: 1.6em; }
+  .unit { position: absolute; right: var(--space-4); top: 50%; transform: translateY(-50%); color: var(--color-text-sub); font-size: var(--fs-body-1); pointer-events: none; }
+  .reading { margin: var(--space-2) 0 var(--space-2); font-size: var(--fs-body-2); line-height: var(--lh-body-2); color: var(--color-primary); font-weight: 600; text-align: right; min-height: var(--lh-body-2); }
 </style>

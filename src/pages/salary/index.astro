@@ -124,49 +124,54 @@ const jsonLd = [
 ];
 ---
 <BaseLayout title={title} description={description} jsonLd={jsonLd} breadcrumbs={[{ name: '급여', href: '/pay/' }, { name: '연봉 실수령액 계산기' }]}>
-  <PageHeader title="연봉 실수령액 계산기" description="연봉을 넣으면 4대보험과 소득세를 뺀 월 실수령액을 알려드려요." updated={tool.updated} />
+  <PageHeader title="연봉 실수령액 계산기" description="연봉을 넣으면 매달 받는 돈을 알려드려요." />
 
   <section class="calc" aria-labelledby="calc-title">
     <h2 id="calc-title" class="sr-only">계산하기</h2>
-    <form id="calc-form" class="inputs" novalidate>
-      <MoneyInput id="annual" label="세전 연봉" value={d.annualSalary} hint="1년 동안 받는 세전 금액이에요. 상여금·성과급은 빼고 넣어요.">
-        <Chips target="annual" items={[{ label: '+100만', add: 1_000_000 }, { label: '+500만', add: 5_000_000 }, { label: '+1,000만', add: 10_000_000 }]} />
-      </MoneyInput>
-
-      <Stepper id="deps" label="부양가족 수 (본인 포함)" value={d.dependents} min={1} max={20} hint="혼자라면 1명이에요. 배우자·자녀 등 부양하는 가족을 더해요." />
-
-      <Details summary="상세 옵션 (비과세액·자녀 수)">
-        <MoneyInput id="nontax" label="월 비과세액" value={d.monthlyNonTaxable} hint="식대처럼 세금이 붙지 않는 돈이에요. 기본값은 식대 한도 20만 원이에요.">
-          <Chips target="nontax" label="비과세액 빠른 입력" items={[{ label: '없음', set: 0 }, { label: '식대 20만', set: 200_000 }, { label: '+10만', add: 100_000 }]} />
+    <form id="calc-form" novalidate>
+      <div class="main-input">
+        <MoneyInput id="annual" label="세전 연봉" value={d.annualSalary} hint="상여금·성과급은 빼고 넣어요.">
+          <Chips target="annual" items={[{ label: '+100만', add: 1_000_000 }, { label: '+500만', add: 5_000_000 }, { label: '+1,000만', add: 10_000_000 }]} />
         </MoneyInput>
-        <Stepper id="kids" label="8세 이상 20세 이하 자녀 수" value={d.children} min={0} max={Math.max(0, d.dependents - 1)} hint="부양가족 수에 포함된 자녀만 세어요." />
-      </Details>
+      </div>
 
-      <div class="actions">
-        <Button type="submit" variant="primary" class="sr-only-focusable">계산하기</Button>
-        <Button variant="ghost" size="sm" data-reset><RotateCcw />초기화</Button>
+      <div class="result">
+        <ResultHero
+          label="월 예상 실수령액"
+          out="monthlyNet"
+          value={view.out.monthlyNet}
+          captionOut="heroCaption"
+          caption={view.out.heroCaption}
+          subs={[
+            { label: '연 실수령액', value: view.out.annualNet, out: 'annualNet' },
+            { label: '월 공제 합계', value: view.out.monthlyDeductionTotal, out: 'monthlyDeductionTotal' },
+          ]}
+        >
+          <p class="caption muted disclaimer">참고용이에요. 실제 급여와 다를 수 있어요.</p>
+          <p class="caption muted" data-result-note hidden>비과세액이 월급보다 커서 월급 전체를 비과세로 계산했어요.</p>
+        </ResultHero>
+      </div>
+
+      <div class="cond">
+        <h3>조건 바꾸기</h3>
+        <Stepper id="deps" label="부양가족 수 (본인 포함)" value={d.dependents} min={1} max={20} hint="혼자라면 1명이에요. 배우자·자녀 등 부양하는 가족을 더해요." />
+
+        <Details summary="상세 옵션 (비과세액·자녀 수)">
+          <MoneyInput id="nontax" label="월 비과세액" value={d.monthlyNonTaxable} hint="식대처럼 세금이 붙지 않는 돈이에요. 기본값은 식대 한도 20만 원이에요.">
+            <Chips target="nontax" label="비과세액 빠른 입력" items={[{ label: '없음', set: 0 }, { label: '식대 20만', set: 200_000 }, { label: '+10만', add: 100_000 }]} />
+          </MoneyInput>
+          <Stepper id="kids" label="8세 이상 20세 이하 자녀 수" value={d.children} min={0} max={Math.max(0, d.dependents - 1)} hint="부양가족 수에 포함된 자녀만 세어요." />
+        </Details>
+
+        <div class="actions">
+          <Button type="submit" variant="primary" class="sr-only-focusable">계산하기</Button>
+          <Button variant="text" size="s" data-reset><RotateCcw />초기화</Button>
+        </div>
       </div>
     </form>
-
-    <div class="result">
-      <ResultHero
-        label="월 예상 실수령액"
-        out="monthlyNet"
-        value={view.out.monthlyNet}
-        captionOut="heroCaption"
-        caption={view.out.heroCaption}
-        subs={[
-          { label: '연 실수령액', value: view.out.annualNet, out: 'annualNet' },
-          { label: '월 공제 합계', value: view.out.monthlyDeductionTotal, out: 'monthlyDeductionTotal' },
-        ]}
-      >
-        <p class="small muted disclaimer">참고용이에요. 실제 급여와 다를 수 있어요.</p>
-        <p class="small muted" data-result-note hidden>비과세액이 월급보다 커서 월급 전체를 비과세로 계산했어요.</p>
-      </ResultHero>
-    </div>
   </section>
 
-  <Section id="detail" title={`결과 상세 (${PAYROLL_BASE_YEAR}년 기준)`} wide>
+  <Section id="detail" title={`결과 상세 (${PAYROLL_BASE_YEAR}년 기준)`}>
     <ResultTable
       caption={view.out.tableCaption}
       captionOut="tableCaption"
@@ -266,16 +271,14 @@ const jsonLd = [
   <Toast />
 </BaseLayout>
 <style>
-  .calc { display: grid; gap: var(--space-5); }
-  .inputs { background: var(--color-surface); border: 1px solid var(--color-border); border-radius: var(--radius-lg); padding: var(--space-4); }
-  .actions { display: flex; align-items: center; justify-content: space-between; gap: var(--space-3); }
-  .disclaimer { margin: var(--space-3) 0 0; }
-  .share { display: flex; flex-wrap: wrap; gap: var(--space-2); margin: var(--space-4) 0 var(--space-3); }
-  @media (min-width: 768px) {
-    .calc { grid-template-columns: 1fr 1fr; align-items: start; }
-    .result { position: sticky; top: var(--space-4); }
-    .inputs { padding: var(--space-5); }
-  }
+  .calc { padding-top: 0; padding-bottom: var(--space-8); }
+  /* 첫 화면에 입력 → 결과가 바로 이어지도록 입력 아래 여백을 줄인다 */
+  .main-input > :global(.field) { margin-bottom: var(--space-4); }
+  .result { margin-bottom: var(--space-8); }
+  .cond h3 { margin-bottom: var(--space-5); }
+  .disclaimer { margin: var(--space-4) 0 0; }
+  .actions { display: flex; align-items: center; justify-content: flex-end; gap: var(--space-3); }
+  .share { display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-2); margin: var(--space-5) 0 var(--space-4); }
 </style>
 <script>
   import '../../scripts/salary-tool';

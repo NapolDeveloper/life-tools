@@ -114,8 +114,17 @@ function applyView(view: ReturnType<typeof viewOf> | null): void {
   }
 }
 
+/** set 칩(예: 식대 20만)은 현재 값과 같을 때 선택 상태로 보여 준다. */
+function syncChips(): void {
+  document.querySelectorAll<HTMLButtonElement>('[data-chip-set]').forEach((chip) => {
+    const target = $(chip.dataset.chipTarget!);
+    chip.setAttribute('aria-pressed', String(parseDigits(target.value) === Number(chip.dataset.chipSet)));
+  });
+}
+
 function update(): void {
   const input = readInput();
+  syncChips();
   const error = validateSalary(input);
   showError(error);
   if (error) {

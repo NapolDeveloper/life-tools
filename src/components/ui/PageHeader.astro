@@ -1,15 +1,15 @@
 ---
-/** H1 + 한 줄 설명 + (선택) 최종 갱신일 */
+/** H1 + 한 줄 설명 + (선택) 최종 갱신일. 한 화면 한 메시지: 큰 제목 하나. */
 interface Props { title: string; description?: string; updated?: string }
 const { title, description, updated } = Astro.props;
 ---
-<header class="page-header prose">
+<header class="page-header">
   <h1>{title}</h1>
   {description && <p class="lead">{description}</p>}
-  {updated && <p class="meta small muted">최종 갱신일 <time datetime={updated}>{updated}</time></p>}
+  {updated && <p class="meta caption tertiary">최종 갱신일 <time datetime={updated}>{updated}</time></p>}
 </header>
 <style>
-  .page-header { margin-bottom: var(--space-5); }
-  .lead { margin: var(--space-2) 0 0; color: var(--color-text-muted); }
+  .page-header { padding-top: var(--space-4); padding-bottom: var(--space-5); }
+  .lead { margin: var(--space-2) 0 0; color: var(--color-text-sub); font-size: var(--fs-body-2); line-height: var(--lh-body-2); }
   .meta { margin: var(--space-2) 0 0; }
 </style>

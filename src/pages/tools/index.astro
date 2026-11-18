@@ -11,7 +11,7 @@ const description =
 <BaseLayout title="전체 계산기 목록" description={description} breadcrumbs={[{ name: '전체 도구' }]}>
   <PageHeader title="전체 계산기 목록" description="돈셈에서 공개한 계산기를 분야별로 모았어요." />
   {CATEGORIES.map((c) => (
-    <Section id={c.slug} title={c.name} wide>
+    <Section id={c.slug} title={c.name}>
       {toolsOf(c.slug).length > 0 ? (
         <div class="grid">{toolsOf(c.slug).map((t) => <ToolCard tool={t} />)}</div>
       ) : (
@@ -23,6 +23,5 @@ const description =
   ))}
 </BaseLayout>
 <style>
-  .grid { display: grid; gap: var(--space-3); grid-template-columns: 1fr; margin-bottom: var(--space-3); }
-  @media (min-width: 768px) { .grid { grid-template-columns: 1fr 1fr; } }
+  .grid { display: grid; gap: var(--space-3); grid-template-columns: 1fr; margin-bottom: var(--space-4); }
 </style>

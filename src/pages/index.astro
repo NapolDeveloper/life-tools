@@ -26,19 +26,19 @@ const jsonLd = [
 ];
 ---
 <BaseLayout title={title} rawTitle description={description} jsonLd={jsonLd}>
-  <header class="hero prose">
+  <header class="hero">
     <h1>{SITE_TAGLINE}</h1>
     <p class="lead">
       월급이 실제로 얼마나 들어오는지, 세금은 얼마나 나가는지 숫자 하나만 넣고 바로 확인해 보세요. 회원가입은 필요 없고, 입력한 값은 내 브라우저 안에서만 계산돼요.
     </p>
   </header>
 
-  <Section id="tools" title="계산기" wide>
+  <Section id="tools" title="계산기">
     <div class="grid">{TOOLS.map((t) => <ToolCard tool={t} />)}</div>
     <p class="small muted more"><a href="/tools/">전체 계산기 보기</a> · 새 계산기는 준비되는 대로 계속 추가해요.</p>
   </Section>
 
-  <Section id="categories" title="분야별로 찾기" wide>
+  <Section id="categories" title="분야별로 찾기">
     <div class="grid">
       {CATEGORIES.map((c) => (
         <a class="cat-card" href={`/${c.slug}/`}>
@@ -64,19 +64,19 @@ const jsonLd = [
   </Section>
 </BaseLayout>
 <style>
-  .hero { margin: var(--space-5) 0 var(--space-4); }
-  .lead { margin: var(--space-3) 0 0; color: var(--color-text-muted); font-size: var(--text-h3); line-height: 1.6; }
+  .hero { padding-top: var(--space-8); padding-bottom: var(--space-8); }
+  h1 { font-size: var(--fs-display); line-height: var(--lh-display); }
+  .lead { margin: var(--space-4) 0 0; color: var(--color-text-sub); font-size: var(--fs-body-1); line-height: var(--lh-body-1); }
   .grid { display: grid; gap: var(--space-3); grid-template-columns: 1fr; }
-  .more { margin-top: var(--space-3); }
+  .more { margin: var(--space-4) 0 0; }
   .cat-card {
-    display: flex; flex-direction: column; gap: var(--space-1); padding: var(--space-4);
-    background: var(--color-surface); border: 1px solid var(--color-border); border-radius: var(--radius-md);
+    display: flex; flex-direction: column; gap: var(--space-1); padding: var(--space-5);
+    background: var(--color-bg-sub); border-radius: var(--radius-xl);
     color: var(--color-text); text-decoration: none; min-height: var(--touch-min);
+    transition: background-color var(--duration-fast) var(--ease), transform var(--duration-fast) var(--ease);
   }
-  .cat-card:hover { border-color: var(--color-primary); background: var(--color-primary-soft); color: var(--color-text); }
-  .cat-card strong { font-size: var(--text-h3); }
-  @media (min-width: 768px) {
-    .grid { grid-template-columns: repeat(3, 1fr); }
-    h1 { font-size: var(--text-display); }
-  }
+  .cat-card:focus-visible { border-radius: var(--radius-xl); }
+  @media (hover: hover) { .cat-card:hover { background: var(--color-primary-weak); color: var(--color-text); } }
+  @media (prefers-reduced-motion: no-preference) { .cat-card:active { transform: scale(var(--press-scale)); } }
+  .cat-card strong { font-size: var(--fs-title-3); line-height: var(--lh-title-3); letter-spacing: var(--tracking-title); }
 </style>

@@ -1,5 +1,5 @@
 ---
-/** 자주 묻는 질문 (4~6개). 네이티브 details/summary. */
+/** 자주 묻는 질문 (4~6개). 네이티브 details/summary, bg-sub 면. */
 interface Props { items: { q: string; a: string }[] }
 const { items } = Astro.props;
 ---
@@ -12,8 +12,7 @@ const { items } = Astro.props;
   ))}
 </div>
 <style>
-  details { background: var(--color-surface); border: 1px solid var(--color-border); border-radius: var(--radius-md); margin-bottom: var(--space-2); }
-  summary { min-height: var(--touch-min); padding: var(--space-3) var(--space-4); font-weight: 600; cursor: pointer; display: flex; align-items: center; }
-  details[open] summary { border-bottom: 1px solid var(--color-border); }
-  p { margin: 0; padding: var(--space-3) var(--space-4); }
+  details { background: var(--color-bg-sub); border-radius: var(--radius-lg); margin-bottom: var(--space-2); }
+  summary { min-height: var(--btn-l); padding: var(--space-3) var(--space-4); font-weight: 600; cursor: pointer; display: flex; align-items: center; border-radius: var(--radius-lg); }
+  p { margin: 0; padding: 0 var(--space-4) var(--space-4); color: var(--color-text-sub); font-size: var(--fs-body-2); line-height: var(--lh-body-2); }
 </style>

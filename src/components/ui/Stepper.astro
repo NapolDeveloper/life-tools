@@ -1,7 +1,7 @@
 ---
 import Minus from '../icons/Minus.astro';
 import Plus from '../icons/Plus.astro';
-/** 정수 개수 입력 (−/+). 값 칸은 읽기 전용이며 ↑↓ 키로도 바꿀 수 있다. */
+/** 정수 개수 입력 (−/+). bg-sub 면 하나에 −/값/+. 값 칸은 읽기 전용이며 ↑↓ 키로도 바꿀 수 있다. */
 interface Props { id: string; label: string; value: number; min?: number; max?: number; hint?: string }
 const { id, label, value, min = 0, max = 20, hint } = Astro.props;
 ---
@@ -16,20 +16,23 @@ const { id, label, value, min = 0, max = 20, hint } = Astro.props;
   <p class="error" id={`${id}-error`} hidden></p>
 </div>
 <style>
-  .field { margin-bottom: var(--space-4); }
-  label { display: block; font-weight: 600; margin-bottom: var(--space-1); }
-  .ctl { display: inline-flex; align-items: stretch; border: 1px solid var(--color-border-strong); border-radius: var(--radius-sm); background: var(--color-surface); overflow: hidden; }
+  .field { margin-bottom: var(--space-6); }
+  label { display: block; font-size: var(--fs-body-2); line-height: var(--lh-body-2); font-weight: 600; color: var(--color-text-sub); margin-bottom: var(--space-2); }
+  .ctl { display: inline-flex; align-items: center; padding: var(--space-1); background: var(--color-bg-sub); border-radius: var(--radius-full); }
   .step {
-    width: var(--touch-min); min-height: var(--touch-min); display: inline-flex; align-items: center; justify-content: center;
-    background: var(--color-surface); border: 0; color: var(--color-primary); cursor: pointer;
+    width: var(--btn-m); height: var(--btn-m); display: inline-flex; align-items: center; justify-content: center;
+    background: transparent; border: 0; border-radius: var(--radius-full); color: var(--color-primary); cursor: pointer;
+    transition: background-color var(--duration-fast) var(--ease), transform var(--duration-fast) var(--ease);
   }
-  .step:hover:not(:disabled) { background: var(--color-primary-soft); }
-  .step:disabled { color: var(--color-text-muted); cursor: not-allowed; opacity: 0.6; }
+  .step:focus-visible { border-radius: var(--radius-full); }
+  .step:disabled { color: var(--color-text-tertiary); cursor: not-allowed; opacity: 0.5; }
+  @media (hover: hover) { .step:hover:not(:disabled) { background: var(--color-primary-weak); } }
+  @media (prefers-reduced-motion: no-preference) { .step:active:not(:disabled) { transform: scale(var(--press-scale)); } }
   input {
-    width: calc(var(--touch-min) + var(--space-3)); text-align: center; border: 0;
-    border-inline: 1px solid var(--color-border); background: var(--color-surface); color: var(--color-text);
-    font-size: max(1rem, var(--text-body)); font-weight: 700; font-variant-numeric: tabular-nums;
+    width: var(--space-10); height: var(--btn-m); text-align: center; border: 0; background: transparent; color: var(--color-text);
+    font-size: var(--fs-body-1); font-weight: 700; font-variant-numeric: tabular-nums;
   }
-  .hint { margin: var(--space-1) 0 0; font-size: var(--text-small); line-height: var(--text-small-lh); color: var(--color-text-muted); }
-  .error { margin: var(--space-1) 0 0; font-size: var(--text-small); color: var(--color-danger); font-weight: 600; }
+  input:focus-visible { outline-offset: -2px; border-radius: var(--radius-full); }
+  .hint { margin: var(--space-2) 0 0; font-size: var(--fs-caption); line-height: var(--lh-caption); color: var(--color-text-tertiary); }
+  .error { margin: var(--space-2) 0 0; font-size: var(--fs-body-2); color: var(--color-danger); font-weight: 600; }
 </style>
