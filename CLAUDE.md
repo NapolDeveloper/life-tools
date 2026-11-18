@@ -23,8 +23,15 @@
 - 타 사이트 문구·디자인 복제 금지. 상표·브랜드명 무단 사용 금지.
 - 법·세금 계산은 "참고용, 실제와 다를 수 있음" 안내를 붙인다.
 
+## 브랜치·배포 흐름
+- `main`: 운영. **사용자가 명시적으로 지시할 때만** develop → main PR을 만들고 머지한다.
+- `develop`: 테스트. 기능 브랜치는 develop에서 따고(`feat/*`, `fix/*`), PR base는 develop.
+- 기능 완료 → `npm test`·`npm run build` 통과 → PR을 develop에 **자동 머지** → develop을 빌드해 미리보기 주소에 반영 → 사용자에게 주소 보고.
+- 테스트·빌드 실패 시 머지하지 않고 원인과 함께 보고.
+- 미리보기 주소: Claude 아티팩트 "생활계산소" (https://claude.ai/artifact/AtrnEngD1WjnXXyTC7Mfki). develop 빌드 결과(dist)를 같은 주소로 재게시한다. Cloudflare Pages 연결 후에는 develop 브랜치 미리보기 주소로 대체.
+
 ## 작업 규칙
-- 한 회차 = 기능 1개(또는 페이지 1~2개). 브랜치 → PR. main 직접 push 금지.
+- 한 회차 = 기능 1개(또는 페이지 1~2개). main·develop 직접 push 금지(문서성 변경 제외).
 - 사용자 승인 필요한 일은 하지 않고 WORKLOG에 남긴다: 계정 생성, 애드센스 신청, 도메인 구매, 결제, 배포 설정, 약관 동의.
 - 회차 종료 시 `WORKLOG.md`에 날짜 / 한 일 / 사용 모델 / 다음 할 일 / 사용자 확인 필요 항목 기록.
 - 커밋 전 `npm run build` 통과 필수.
