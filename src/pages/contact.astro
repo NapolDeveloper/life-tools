@@ -1,19 +1,31 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
-import { CONTACT_EMAIL, SITE_NAME } from '../config';
+import PageHeader from '../components/ui/PageHeader.astro';
+import Notice from '../components/ui/Notice.astro';
+import { CONTACT_EMAIL, SITE_NAME, LAST_UPDATED } from '../config';
+
+const description = `${SITE_NAME}에 대한 문의, 계산 오류 제보, 개선 제안은 이메일로 보내 주세요. 오류 제보는 48시간 안에 확인하고 수정하면 변경 이력에 남겨요.`;
 ---
-<BaseLayout title="문의" description={`${SITE_NAME}에 대한 문의, 오류 제보, 제안은 이메일로 보내 주세요.`}>
-  <h1>문의</h1>
-  <p class="lead">오류 제보, 개선 제안, 기타 문의는 아래 이메일로 보내 주세요.</p>
-  <div class="card">
-    <p><strong>이메일</strong>: <span class="placeholder">{CONTACT_EMAIL}</span></p>
-    <p>답변은 영업일 기준 며칠 정도 걸릴 수 있어요.</p>
+<BaseLayout title="문의" description={description} breadcrumbs={[{ name: '문의' }]}>
+  <PageHeader title="문의" description="오류 제보, 개선 제안, 기타 문의는 아래 이메일로 보내 주세요." updated={LAST_UPDATED} />
+  <div class="prose doc">
+    <Notice title="이메일">
+      <p><strong>{CONTACT_EMAIL}</strong></p>
+      <p>이메일 외에 별도의 문의 양식이나 회원가입은 없어요.</p>
+    </Notice>
+
+    <h2>답변 시간</h2>
+    <p>계산 오류 제보는 48시간 안에 확인해요. 그 외 문의는 영업일 기준으로 며칠 걸릴 수 있어요.</p>
+
+    <h2>문의할 때 알려 주면 좋은 내용</h2>
+    <ul>
+      <li>문의하는 계산기 이름과 페이지 주소</li>
+      <li>오류라면 입력한 값, 기대한 결과, 실제로 나온 결과</li>
+      <li>사용 중인 기기와 브라우저</li>
+    </ul>
+    <p>주민등록번호나 계좌번호 같은 개인정보는 메일에 적지 말아 주세요.</p>
+
+    <h2>만들어 주었으면 하는 계산기</h2>
+    <p>필요한 계산기가 있다면 어떤 상황에서 쓰고 싶은지 함께 알려 주세요. 요청이 많은 계산기부터 공식 기준을 확인해서 만들게요.</p>
   </div>
-  <h2>문의하실 때 알려 주시면 좋은 내용</h2>
-  <ul class="plain">
-    <li>문의하는 도구 이름과 페이지 주소</li>
-    <li>오류라면 입력한 값과 기대한 결과, 실제로 나온 결과</li>
-    <li>사용 중인 기기와 브라우저</li>
-  </ul>
-  <p>개인정보(주민등록번호, 계좌번호 등)는 메일에 적지 말아 주세요.</p>
 </BaseLayout>

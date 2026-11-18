@@ -77,3 +77,8 @@ button, input, select, textarea { font: inherit; color: inherit; }
 @media (min-width: 768px) {
   main { padding-top: var(--space-5); }
 }
+
+/* 문서형 페이지(소개·약관·방침) 본문 */
+.doc h2 { margin: var(--space-6) 0 var(--space-2); }
+.doc h3 { margin: var(--space-5) 0 var(--space-2); }
+.doc ul, .doc ol { margin-bottom: var(--space-4); }

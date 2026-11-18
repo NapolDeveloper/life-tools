@@ -1,11 +1,20 @@
 import { defineConfig } from 'astro/config';
 import sitemap from '@astrojs/sitemap';
 import { SITE_URL } from './src/config.ts';
+import { PAGES } from './src/lib/pages.ts';
+
+// 색인 대상(PAGES)만 sitemap에 넣는다. 404·design-system 등은 자동으로 제외된다.
+const pageOf = (url) => PAGES.find((p) => p.path === new URL(url).pathname);
 
 export default defineConfig({
   site: SITE_URL,
   output: 'static',
   trailingSlash: 'always',
   build: { format: 'directory' },
-  integrations: [sitemap()],
+  integrations: [
+    sitemap({
+      filter: (url) => Boolean(pageOf(url)),
+      serialize: (item) => ({ ...item, lastmod: pageOf(item.url)?.lastmod }),
+    }),
+  ],
 });

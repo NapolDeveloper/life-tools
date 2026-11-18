@@ -1,0 +1,28 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import PageHeader from '../components/ui/PageHeader.astro';
+import Section from '../components/ui/Section.astro';
+import ToolCard from '../components/ui/ToolCard.astro';
+import { TOOLS, CATEGORIES } from '../config';
+---
+<BaseLayout
+  title="페이지를 찾을 수 없어요"
+  description="찾으시는 페이지가 없거나 주소가 바뀌었어요. 많이 찾는 계산기와 분야별 목록에서 필요한 페이지를 찾아보세요."
+  noindex
+>
+  <PageHeader title="페이지를 찾을 수 없어요" description="주소가 바뀌었거나 없어진 페이지예요. 아래에서 필요한 계산기를 찾아보세요." />
+  <Section id="popular" title="많이 찾는 계산기" wide>
+    <div class="grid">{TOOLS.map((t) => <ToolCard tool={t} />)}</div>
+  </Section>
+  <Section id="categories" title="분야별 계산기">
+    <ul>
+      {CATEGORIES.map((c) => <li><a href={`/${c.slug}/`}>{c.name} 계산기 모음</a></li>)}
+      <li><a href="/tools/">전체 계산기 목록</a></li>
+      <li><a href="/">돈셈 홈으로</a></li>
+    </ul>
+  </Section>
+</BaseLayout>
+<style>
+  .grid { display: grid; gap: var(--space-3); grid-template-columns: 1fr; }
+  @media (min-width: 768px) { .grid { grid-template-columns: 1fr 1fr; } }
+</style>

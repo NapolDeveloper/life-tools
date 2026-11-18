@@ -1,0 +1,28 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import PageHeader from '../../components/ui/PageHeader.astro';
+import Section from '../../components/ui/Section.astro';
+import ToolCard from '../../components/ui/ToolCard.astro';
+import { CATEGORIES, toolsOf } from '../../config';
+
+const description =
+  '돈셈에서 공개한 모든 계산기를 분야별로 모았어요. 급여, 세금, 노동·고용 계산기를 한눈에 보고 필요한 계산기로 바로 이동해 보세요.';
+---
+<BaseLayout title="전체 계산기 목록" description={description} breadcrumbs={[{ name: '전체 도구' }]}>
+  <PageHeader title="전체 계산기 목록" description="돈셈에서 공개한 계산기를 분야별로 모았어요." />
+  {CATEGORIES.map((c) => (
+    <Section id={c.slug} title={c.name} wide>
+      {toolsOf(c.slug).length > 0 ? (
+        <div class="grid">{toolsOf(c.slug).map((t) => <ToolCard tool={t} />)}</div>
+      ) : (
+        <p class="muted">아직 공개한 계산기가 없어요.</p>
+      )}
+      {c.planned.length > 0 && <p class="small muted">준비 중: {c.planned.join(', ')}</p>}
+      <p class="small"><a href={`/${c.slug}/`}>{c.name} 계산기 모음 보기</a></p>
+    </Section>
+  ))}
+</BaseLayout>
+<style>
+  .grid { display: grid; gap: var(--space-3); grid-template-columns: 1fr; margin-bottom: var(--space-3); }
+  @media (min-width: 768px) { .grid { grid-template-columns: 1fr 1fr; } }
+</style>

@@ -7,7 +7,7 @@
 | 이름 | 용도 | 버전 | 라이선스 | 출처 | 비고 |
 |---|---|---|---|---|---|
 | Pretendard (가변, 동적 서브셋 woff2) | 웹폰트 1종 (본문·제목·숫자) | 1.3.9 (npm `pretendard`) | SIL Open Font License 1.1 | https://github.com/orioncactus/pretendard | `public/fonts/pretendard/`에 self-host. 사본: `docs/licenses/Pretendard-OFL.txt`. `font-display: swap`, 핵심 서브셋 preload |
-| Lucide 아이콘 (필요한 14개만 SVG 컴포넌트) | 버튼·안내 아이콘 | - | ISC | https://lucide.dev (https://github.com/lucide-icons/lucide) | `src/components/icons/`. 패키지 전체를 번들하지 않고 path만 옮겨 둠. 사본: `docs/licenses/Lucide-ISC.txt` |
+| Lucide 아이콘 (필요한 13개만 SVG 컴포넌트) | 버튼·안내 아이콘 | - | ISC | https://lucide.dev (https://github.com/lucide-icons/lucide) | `src/components/icons/`. 패키지 전체를 번들하지 않고 path만 옮겨 둠. 사본: `docs/licenses/Lucide-ISC.txt` |
 
 ## 빌드 도구 (사이트에 포함되지 않음, OG 이미지 생성용)
 
