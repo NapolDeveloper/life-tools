@@ -48,8 +48,7 @@ const text: [string, string, number][] = [
   ['warning', 'bg', 4.5], ['warning', 'bg-sub', 4.5], ['warning', 'surface-sub', 4.5],
 ];
 const nonText: [string, string, number][] = [
-  // 다크 line-strong(#5c6863)은 bg 위에서만 3:1이다. bg-sub·surface 위에서는 2.9:1이라 외곽선으로 쓰지 않는다.
-  ['line-strong', 'bg', 3],
+  ['line-strong', 'bg', 3], ['line-strong', 'surface', 3], ['line-strong', 'surface-sub', 3],
   ['primary', 'bg', 3], ['primary', 'bg-sub', 3], // 포커스 링
 ];
 const pairs = [...text, ...nonText].map(([fg, bg, min]) => [`color-${fg}`, `color-${bg}`, min] as [string, string, number]);
@@ -71,4 +70,9 @@ describe('팔레트·토큰 구성', () => {
     const semantic = css.match(/--color-[a-z-]+:\s*var\(--green-(400|500)\)/g);
     expect(semantic).toBeNull();
   });
+});
+
+// 라이트 line-strong(grey-500)은 bg-sub 위에서 2.9:1이라 라이트에서는 bg-sub 위 외곽선으로 쓰지 않는다(규칙 원본 검토 대상). 다크는 모든 배경에서 3:1 이상.
+it.each(['bg-sub'])('다크 line-strong / %s >= 3:1', (bg) => {
+  expect(ratio(dark['color-line-strong'], dark[`color-${bg}`])).toBeGreaterThanOrEqual(3);
 });

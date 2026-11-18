@@ -48,7 +48,7 @@
   --color-warning: #8f5400;
 
   /* 타이포그래피 (Pretendard) */
-  --font-sans: 'Pretendard Variable', Pretendard, -apple-system, BlinkMacSystemFont, 'Apple SD Gothic Neo', 'Noto Sans KR', 'Malgun Gothic', system-ui, sans-serif;
+  --font-sans: 'Donsem Subset', 'Pretendard Variable', Pretendard, -apple-system, BlinkMacSystemFont, 'Apple SD Gothic Neo', 'Noto Sans KR', 'Malgun Gothic', system-ui, sans-serif;
   --fs-display: 34px; --lh-display: 44px; --fw-display: 700;
   --fs-title-1: 26px; --lh-title-1: 36px; --fw-title-1: 700;
   --fs-title-2: 22px; --lh-title-2: 31px; --fw-title-2: 700;
@@ -102,7 +102,7 @@
     --color-text-sub: #a3aea9;
     --color-text-tertiary: #8c9792;
     --color-line: #2b3430;
-    --color-line-strong: #5c6863;
+    --color-line-strong: #6b7873;
     --color-primary: #3fd38b;
     --color-primary-pressed: #24b871;
     --color-primary-weak: #163526;

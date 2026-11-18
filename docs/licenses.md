@@ -7,6 +7,7 @@
 | 이름 | 용도 | 버전 | 라이선스 | 출처 | 비고 |
 |---|---|---|---|---|---|
 | Pretendard (가변, 동적 서브셋 woff2) | 웹폰트 1종 (본문·제목·숫자) | 1.3.9 (npm `pretendard`) | SIL Open Font License 1.1 | https://github.com/orioncactus/pretendard | `public/fonts/pretendard/`에 self-host. 사본: `docs/licenses/Pretendard-OFL.txt`. `font-display: swap`, 핵심 서브셋 preload |
+| Donsem Subset (Pretendard 파생 단일 서브셋 woff2) | 사이트에서 쓰는 글자만 담은 글꼴 1파일 (성능) | Pretendard 1.3.9에서 생성 | SIL Open Font License 1.1 | `scripts/subset-fonts.py`(fontTools)로 `node_modules/pretendard`의 가변 TTF에서 생성, 굵기 400~700 | `public/fonts/donsem-subset.woff2`. 파생본이라 예약 글꼴 이름 조항을 피하려고 내부 이름을 "Donsem Subset"으로 바꿨고 저작권 문구는 유지. 서브셋에 없는 글자는 위 Pretendard 동적 서브셋이 맡음. 사본: `docs/licenses/Pretendard-OFL.txt` |
 | Lucide 아이콘 (필요한 13개만 SVG 컴포넌트) | 버튼·안내 아이콘 | - | ISC | https://lucide.dev (https://github.com/lucide-icons/lucide) | `src/components/icons/`. 패키지 전체를 번들하지 않고 path만 옮겨 둠. 사본: `docs/licenses/Lucide-ISC.txt` |
 
 ## 빌드 도구 (사이트에 포함되지 않음, OG 이미지 생성용)
