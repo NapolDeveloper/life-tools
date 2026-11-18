@@ -4,11 +4,11 @@
  * data-out 속성은 계산기 스크립트가 값을 갱신하는 자리다.
  */
 export interface HeroSub { label: string; value: string; out?: string }
-interface Props { label: string; value: string; out?: string; caption?: string; captionOut?: string; subs?: HeroSub[] }
-const { label, value, out = 'hero', caption, captionOut, subs = [] } = Astro.props;
+interface Props { label: string; labelOut?: string; value: string; out?: string; caption?: string; captionOut?: string; subs?: HeroSub[]; kind?: string }
+const { label, labelOut, value, out = 'hero', caption, captionOut, subs = [], kind } = Astro.props;
 ---
-<section class="hero" aria-label="계산 결과" data-hero>
-  <p class="label">{label}</p>
+<section class="hero" aria-label="계산 결과" data-hero data-kind={kind}>
+  <p class="label" data-out={labelOut}>{label}</p>
   <div class="live" aria-live="polite" aria-atomic="true">
     <p class="value num" data-out={out}>{value}</p>
     <p class="error" data-result-error hidden></p>
@@ -35,6 +35,8 @@ const { label, value, out = 'hero', caption, captionOut, subs = [] } = Astro.pro
     border-radius: var(--radius-sm);
   }
   .value.flash { animation: flash var(--duration-base) var(--ease); }
+  /* 추가 납부처럼 숫자를 강조색으로 두지 않을 때는 본문색 (문구·아이콘으로 구분하므로 색에만 의존하지 않는다) */
+  .hero[data-kind='extra'] .value { color: var(--color-text); }
   .error { margin: 0; color: var(--color-danger); font-weight: 700; }
   .caption { margin: var(--space-1) 0 0; font-size: var(--fs-body-2); line-height: var(--lh-body-2); color: var(--color-text-sub); }
   .subs { display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-4); margin: var(--space-4) 0 0; }

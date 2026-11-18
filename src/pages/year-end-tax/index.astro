@@ -1,0 +1,419 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import PageHeader from '../../components/ui/PageHeader.astro';
+import Section from '../../components/ui/Section.astro';
+import MoneyInput from '../../components/ui/MoneyInput.astro';
+import Chips from '../../components/ui/Chips.astro';
+import Stepper from '../../components/ui/Stepper.astro';
+import Segmented from '../../components/ui/Segmented.astro';
+import Details from '../../components/ui/Details.astro';
+import Button from '../../components/ui/Button.astro';
+import ResultHero from '../../components/ui/ResultHero.astro';
+import ResultTable from '../../components/ui/ResultTable.astro';
+import StickyResultBar from '../../components/ui/StickyResultBar.astro';
+import CopyButton from '../../components/ui/CopyButton.astro';
+import ShareButton from '../../components/ui/ShareButton.astro';
+import Toast from '../../components/ui/Toast.astro';
+import AdSlot from '../../components/ui/AdSlot.astro';
+import Steps from '../../components/ui/Steps.astro';
+import DataTable from '../../components/ui/DataTable.astro';
+import SourceList from '../../components/ui/SourceList.astro';
+import Notice from '../../components/ui/Notice.astro';
+import FaqList from '../../components/ui/FaqList.astro';
+import ToolCard from '../../components/ui/ToolCard.astro';
+import ChangeLog from '../../components/ui/ChangeLog.astro';
+import RotateCcw from '../../components/icons/RotateCcw.astro';
+import Check from '../../components/icons/Check.astro';
+import Info from '../../components/icons/Info.astro';
+import ExternalLink from '../../components/icons/ExternalLink.astro';
+import { SITE_NAME, SITE_URL, TOOLS, getCategory } from '../../config';
+import { calculateYearEnd } from '../../lib/year-end-tax';
+import { YEAR_END_DEFAULTS } from '../../lib/year-end-query';
+import { viewOf, hintsOf, YE_ROWS, YE_TOTAL_ROWS } from '../../lib/year-end-view';
+import { won, koreanAmount } from '../../lib/format';
+import { INCOME_TAX } from '../../data/payroll';
+import {
+  YE_BASE_YEAR, YE_AS_OF, YE_SOURCES, CARD, PERSONAL, CHILD_CREDIT, PENSION_ACCOUNT, SPECIAL_CREDIT, RENT_CREDIT, STANDARD_CREDIT, MARRIAGE_CREDIT,
+} from '../../data/year-end-tax-2026';
+
+const tool = TOOLS.find((t) => t.slug === 'year-end-tax')!;
+const salaryTool = TOOLS.find((t) => t.slug === 'salary')!;
+const taxCat = getCategory('tax');
+const d = YEAR_END_DEFAULTS;
+const initial = calculateYearEnd(d);
+const view = viewOf(initial, d);
+const hints = hintsOf(initial, d);
+const out = view.out;
+
+const title = `연말정산 계산기 (${YE_BASE_YEAR}년 귀속)`;
+const description = `연봉과 카드 사용액, 가족, 공제 항목을 넣으면 ${YE_BASE_YEAR}년 귀속 연말정산 예상 환급액이나 추가 납부액을 바로 알려드려요. 계산 순서와 기준값을 공개해요.`;
+const man = (n: number) => `${(n / 10_000).toLocaleString('ko-KR')}만 원`;
+const pct = (n: number) => `${+(n * 100).toFixed(1)}%`;
+
+const rowOf = (def: { key: string; label: string }) => ({ key: def.key, label: def.label, ...view.rows[def.key] });
+
+/* ---------- 예시 3건 ---------- */
+const examples = [
+  { name: '예시 1', desc: '연봉 3,000만 원, 혼자, 자녀 없음', input: { ...d, annualSalary: 30_000_000 } },
+  { name: '예시 2', desc: '연봉 5,000만 원, 가족 4명(자녀 2명), 카드 많이 사용', input: { ...d, annualSalary: 50_000_000, dependents: 4, children: 2, cardCredit: 20_000_000, cardDebit: 10_000_000, cardMarket: 500_000, cardTransit: 1_200_000 } },
+  { name: '예시 3', desc: '연봉 7,000만 원, 혼자, 연금저축 600만 원', input: { ...d, annualSalary: 70_000_000, pensionSaving: 6_000_000 } },
+].map((e) => ({ ...e, r: calculateYearEnd(e.input) }));
+const signed = (n: number) => (n === 0 ? won(0) : `${n < 0 ? '환급 ' : '추가 납부 '}${won(Math.abs(n))}`);
+const exampleRows = [
+  { item: '조건', ...Object.fromEntries(examples.map((e, i) => [`e${i}`, e.desc])) },
+  { item: '총급여', ...Object.fromEntries(examples.map((e, i) => [`e${i}`, won(e.r.totalSalary)])) },
+  { item: '카드 소득공제', ...Object.fromEntries(examples.map((e, i) => [`e${i}`, won(e.r.cardDeduction)])) },
+  { item: '과세표준', ...Object.fromEntries(examples.map((e, i) => [`e${i}`, won(e.r.taxBase)])) },
+  { item: '산출세액', ...Object.fromEntries(examples.map((e, i) => [`e${i}`, won(e.r.calculatedTax)])) },
+  { item: '세액공제 합계', ...Object.fromEntries(examples.map((e, i) => [`e${i}`, won(e.r.creditsApplied)])) },
+  { item: '결정세액 (소득세)', ...Object.fromEntries(examples.map((e, i) => [`e${i}`, won(e.r.determinedTax)])) },
+  { item: '이미 낸 소득세 (추정)', ...Object.fromEntries(examples.map((e, i) => [`e${i}`, won(e.r.paidIncomeTax)])) },
+  { item: '정산 결과 (지방소득세 포함)', ...Object.fromEntries(examples.map((e, i) => [`e${i}`, signed(e.r.diff)])) },
+];
+
+/* ---------- 기준표 ---------- */
+const bracketRows = INCOME_TAX.brackets.map((b, i) => {
+  const from = i === 0 ? 0 : INCOME_TAX.brackets[i - 1].upTo;
+  const range =
+    i === 0 ? `${koreanAmount(b.upTo)} 이하` : b.upTo === Infinity ? `${koreanAmount(from)} 초과` : `${koreanAmount(from)} 초과 ~ ${koreanAmount(b.upTo)} 이하`;
+  return { range, rate: pct(b.rate), deduction: won(b.deduction) };
+});
+const cardLimitRows = [
+  { salary: '7,000만 원 이하', c0: man(CARD.baseLimitLow), c1: man(CARD.baseLimitLow + CARD.childAddLow), c2: man(CARD.baseLimitLow + CARD.childAddLowMax) },
+  { salary: '7,000만 원 초과', c0: man(CARD.baseLimitHigh), c1: man(CARD.baseLimitHigh + CARD.childAddHigh), c2: man(CARD.baseLimitHigh + CARD.childAddHighMax) },
+];
+const cardRateRows = [
+  { item: '신용카드', rate: pct(CARD.rates.credit) },
+  { item: '체크카드·현금영수증', rate: pct(CARD.rates.debit) },
+  { item: '도서·공연·박물관·미술관·영화·수영장·체력단련장 (총급여 7,000만 원 이하)', rate: pct(CARD.rates.culture) },
+  { item: '전통시장·대중교통', rate: pct(CARD.rates.market) },
+];
+const creditRows = [
+  { item: '근로소득세액공제', rule: '산출세액 130만 원 이하 55%, 초과분 30%. 총급여에 따라 한도 74만~20만 원', basis: '소득세법 제59조' },
+  { item: '자녀세액공제', rule: `만 9세 이상 자녀 1명 ${man(CHILD_CREDIT.one)}, 2명 ${man(CHILD_CREDIT.two)}, 3명부터 1명당 ${man(CHILD_CREDIT.perExtra)} 추가`, basis: '소득세법 제59조의2' },
+  { item: '출산·입양', rule: `첫째 ${man(CHILD_CREDIT.birth.first)}, 둘째 ${man(CHILD_CREDIT.birth.second)}, 셋째 이상 ${man(CHILD_CREDIT.birth.third)}`, basis: '소득세법 제59조의2' },
+  { item: '연금계좌', rule: `연금저축 ${man(PENSION_ACCOUNT.savingLimit)}, IRP 포함 ${man(PENSION_ACCOUNT.totalLimit)} 한도, 공제율 ${pct(PENSION_ACCOUNT.rateLow)} (총급여 5,500만 원 초과 ${pct(PENSION_ACCOUNT.rateHigh)})`, basis: '소득세법 제59조의3' },
+  { item: '보험료', rule: `보장성 보험료 ${man(SPECIAL_CREDIT.insuranceLimit)}까지 ${pct(SPECIAL_CREDIT.insuranceRate)}`, basis: '소득세법 제59조의4' },
+  { item: '의료비', rule: `총급여 3%를 넘는 금액의 ${pct(SPECIAL_CREDIT.medicalRate)}, 그 외 가족분은 ${man(SPECIAL_CREDIT.medicalOtherLimit)} 한도`, basis: '소득세법 제59조의4' },
+  { item: '교육비', rule: `${pct(SPECIAL_CREDIT.educationRate)}, 취학 전·초중고 1인 ${man(SPECIAL_CREDIT.educationPerChildLimit)}, 대학 1인 ${man(SPECIAL_CREDIT.educationPerUnivLimit)} 한도 (본인은 한도 없음)`, basis: '소득세법 제59조의4' },
+  { item: '기부금', rule: `${man(SPECIAL_CREDIT.donationHighBoundary)}까지 ${pct(SPECIAL_CREDIT.donationRate)}, 초과분 ${pct(SPECIAL_CREDIT.donationHighRate)}`, basis: '소득세법 제59조의4' },
+  { item: '월세', rule: `총급여 8,000만 원 이하 무주택 세대주, 연 ${man(RENT_CREDIT.maxRent)}까지 ${pct(RENT_CREDIT.rateLow)} (총급여 5,500만 원 초과 ${pct(RENT_CREDIT.rateHigh)})`, basis: '조세특례제한법 제95조의2' },
+  { item: '결혼', rule: `2024~2026년 혼인신고 시 1회 ${man(MARRIAGE_CREDIT)}`, basis: '조세특례제한법 제92조의3' },
+  { item: '표준세액공제', rule: `${won(STANDARD_CREDIT)}. 항목별 공제와 비교해 유리한 쪽을 자동으로 골라요`, basis: '소득세법 제59조의4' },
+];
+
+const faqs = [
+  {
+    q: '환급과 추가 납부는 어떻게 갈리나요?',
+    a: '연말정산은 1년 동안 월급에서 미리 뗀 소득세와 실제로 내야 할 세금(결정세액)을 비교하는 절차예요. 이미 낸 세금이 더 많으면 차액을 돌려받고(환급), 적으면 모자란 만큼 더 내요(추가 납부). 돈셈은 결정세액에서 이미 낸 세금을 뺀 값이 음수면 환급, 양수면 추가 납부로 보여 드려요.',
+  },
+  {
+    q: '이미 낸 소득세는 어디서 찾나요?',
+    a: '회사에서 받는 근로소득 원천징수영수증이나 12월 급여명세서의 "소득세" 연간 합계(또는 1~11월 합계에 12월 예상분)에서 찾을 수 있어요. 홈택스의 연말정산 미리보기에서도 확인할 수 있어요. 값을 비워 두면 연봉으로 간이세액을 추정해서 계산하고, 추정치라는 표시가 나와요. 정확한 결과가 필요하면 실제 금액을 넣어 주세요.',
+  },
+  {
+    q: '표준세액공제는 무엇인가요?',
+    a: `보험료·의료비·교육비·기부금·월세 세액공제를 신청하지 않을 때 ${won(STANDARD_CREDIT)}을 세액에서 빼 주는 제도예요. 항목별 공제를 모두 합한 금액이 이보다 크면 항목별로 신청하는 편이 세금이 적어요. 돈셈은 두 방식의 결정세액을 모두 계산해서 낮은 쪽을 자동으로 고르고, 어느 쪽인지 결과 아래에 알려 드려요.`,
+  },
+  {
+    q: '자녀세액공제는 몇 살부터 받을 수 있나요?',
+    a: `${YE_BASE_YEAR}년 귀속 연말정산에서는 만 ${CHILD_CREDIT.minAge}세 이상 20세 이하 기본공제 대상 자녀가 자녀세액공제 대상이에요. 나이 기준은 해마다 단계적으로 조정되고 있어서 입력칸 라벨에도 나이를 적어 두었어요. 만 8세 이하 자녀는 자녀세액공제는 없지만 기본공제와 카드 소득공제 한도 가산에는 반영돼요. 올해 태어나거나 입양한 자녀는 별도로 출산·입양 세액공제를 고를 수 있어요.`,
+  },
+  {
+    q: '이 계산기가 다루지 않는 항목은 무엇인가요?',
+    a: '부녀자·한부모 추가공제, 소비증가분 카드 추가공제, 고향사랑기부금·정치자금 기부금 특례, 장기주택저당차입금 이자 상환액 공제, 국외 소득, 중도 입·퇴사자, 둘 이상 회사 합산은 범위 밖이에요. 이런 항목이 있다면 홈택스 연말정산 미리보기나 회사 담당자에게 확인해 주세요.',
+  },
+  {
+    q: '회사 결과와 계산 결과가 다른 이유가 뭔가요?',
+    a: '회사는 간소화 자료로 실제 지출을 확인해서 정산하고, 돈셈은 입력한 숫자를 기준으로 계산해서 차이가 생겨요. 부양가족 요건(소득 기준), 카드 종류별 구분, 의료비·교육비 해당 여부, 월 중 입사·퇴사, 상여금 시기에 따른 기납부세액 차이도 이유가 돼요. 이 계산기는 참고용이고 실제 정산은 회사와 국세청 기준으로 확정돼요.',
+  },
+];
+
+const changelog = [{ date: '2026-11-18', text: `최초 공개. ${YE_BASE_YEAR}년 귀속 기준으로 카드 소득공제 한도 상향, 자녀세액공제 나이 기준, 초등 저학년 예체능 학원비 포함을 반영했어요.` }];
+
+const pageUrl = new URL('/year-end-tax/', SITE_URL).href;
+const jsonLd = [
+  {
+    '@context': 'https://schema.org',
+    '@type': 'WebApplication',
+    name: `${SITE_NAME} 연말정산 계산기`,
+    applicationCategory: 'FinanceApplication',
+    operatingSystem: 'Any',
+    inLanguage: 'ko',
+    url: pageUrl,
+    description,
+    datePublished: tool.published,
+    dateModified: tool.updated,
+    offers: { '@type': 'Offer', price: '0', priceCurrency: 'KRW' },
+  },
+];
+
+const stepperMax = { seniors: d.dependents, disabled: d.dependents, children: Math.max(0, d.dependents - 1), youngChildren: Math.max(0, d.dependents - 1) };
+const cardFields = [
+  { id: 'cardCredit', label: '신용카드', hint: '1년 동안 쓴 금액이에요. 홈택스 간소화 자료에서 확인해요.' },
+  { id: 'cardDebit', label: '체크카드·현금영수증', hint: '직불카드, 선불카드, 현금영수증을 합쳐요.' },
+  { id: 'cardCulture', label: '도서·공연·박물관·영화·체육시설', hint: '총급여 7,000만 원 이하만 공제율이 높아요. 초과하면 일반 사용액으로 계산해요.' },
+  { id: 'cardMarket', label: '전통시장', hint: '' },
+  { id: 'cardTransit', label: '대중교통', hint: '버스·지하철 같은 대중교통 이용분이에요. 택시는 해당하지 않아요.' },
+];
+---
+<BaseLayout title={title} description={description} jsonLd={jsonLd} breadcrumbs={[{ name: taxCat.name, href: '/tax/' }, { name: '연말정산 계산기' }]}>
+  <PageHeader title="연말정산 계산기" description={`연봉과 사용한 금액을 넣으면 ${YE_BASE_YEAR}년 귀속 환급액을 알려드려요.`} />
+
+  <section class="calc" aria-labelledby="calc-title">
+    <h2 id="calc-title" class="sr-only">계산하기</h2>
+    <form id="calc-form" novalidate>
+      <div class="main-input">
+        <MoneyInput id="annualSalary" label="세전 연봉" value={d.annualSalary} hint="비과세 급여를 포함한 1년치 금액이에요.">
+          <Chips target="annualSalary" items={[{ label: '+100만', add: 1_000_000 }, { label: '+500만', add: 5_000_000 }, { label: '+1,000만', add: 10_000_000 }]} />
+        </MoneyInput>
+      </div>
+
+      <div class="result">
+        <ResultHero
+          label={out.heroLabel}
+          labelOut="heroLabel"
+          out="diffAbs"
+          value={out.diffAbs}
+          kind={initial.kind}
+          captionOut="heroCaption"
+          caption={out.heroCaption}
+          subs={[
+            { label: '내야 할 세금', value: out.determinedTotal, out: 'determinedTotal' },
+            { label: '이미 낸 세금', value: out.paidTotal, out: 'paidTotal' },
+          ]}
+        >
+          <p class="badge caption">
+            <span class="ic ic-refund" aria-hidden="true"><Check /></span>
+            <span class="ic ic-extra" aria-hidden="true"><Info /></span>
+            <span data-out="badge">{out.badge}</span>
+          </p>
+          <p class="caption muted disclaimer">참고용 계산이에요. 실제 정산은 회사·국세청 기준으로 확정돼요.</p>
+          <p class="caption muted" data-result-note hidden>이미 낸 세금은 연봉으로 추정한 값이에요. '이미 낸 세금' 칸에 실제 금액을 넣으면 더 정확해요.</p>
+        </ResultHero>
+      </div>
+
+      <div class="cond">
+        <h3>조건 바꾸기</h3>
+
+        <Details summary="기본 정보 (비과세·가족)" open>
+          <MoneyInput id="monthlyNonTaxable" label="월 비과세액" value={d.monthlyNonTaxable} hint="식대처럼 세금이 붙지 않는 돈이에요. 기본값은 식대 한도 20만 원이에요.">
+            <Chips target="monthlyNonTaxable" label="비과세액 빠른 입력" items={[{ label: '없음', set: 0 }, { label: '식대 20만', set: 200_000 }]} />
+          </MoneyInput>
+          <Stepper id="dependents" label="기본공제 인원 (본인 포함)" value={d.dependents} min={1} max={20} hint="혼자라면 1명이에요. 배우자·자녀·부모 등 기본공제를 받는 가족을 더해요." />
+          <Stepper id="seniors" label="70세 이상 인원" value={d.seniors} min={0} max={stepperMax.seniors} hint="본인과 가족 중 만 70세 이상이면 1인당 100만 원 추가 공제예요." />
+          <Stepper id="disabled" label="장애인 인원" value={d.disabled} min={0} max={stepperMax.disabled} hint="1인당 200만 원 추가 공제예요." />
+          <Stepper id="children" label="만 9세 이상 ~ 20세 이하 자녀 수" value={d.children} min={0} max={stepperMax.children} hint="기본공제를 받는 자녀만 세어요. 자녀세액공제 대상이에요." />
+          <Stepper id="youngChildren" label="만 8세 이하 자녀 수" value={d.youngChildren} min={0} max={stepperMax.youngChildren} hint="카드 소득공제 한도 가산에만 반영돼요." />
+          <Segmented name="birthOrder" legend="올해 태어나거나 입양한 자녀" value={String(d.birthOrder)} options={[{ value: '0', label: '없음' }, { value: '1', label: '첫째' }, { value: '2', label: '둘째' }, { value: '3', label: '셋째 이상' }]} />
+        </Details>
+
+        <Details summary="이미 낸 세금·보험료 (비우면 추정)">
+          <MoneyInput id="paidIncomeTax" label="이미 낸 소득세 (연 합계)" value={null} placeholder="비우면 추정해요" hint="원천징수영수증이나 급여명세서의 소득세 합계예요. 지방소득세는 자동으로 더해요." />
+          <MoneyInput id="paidPension" label="국민연금 본인 부담액 (연 합계)" value={null} placeholder="비우면 추정해요" hint="급여명세서의 국민연금을 12개월 합친 금액이에요." />
+          <MoneyInput id="paidHealth" label="건강·장기요양·고용보험 본인 부담액 (연 합계)" value={null} placeholder="비우면 추정해요" hint="세 가지를 모두 합친 연간 금액이에요." />
+        </Details>
+
+        <Details summary="카드 사용액">
+          {cardFields.map((f) => <MoneyInput id={f.id} label={f.label} value={d[f.id as keyof typeof d] as number} hint={f.hint || undefined} />)}
+        </Details>
+
+        <Details summary="의료비·교육비·보험료·기부금">
+          <MoneyInput id="medicalSelf" label="의료비: 본인·65세 이상·장애인·6세 이하" value={d.medicalSelf} hint="이 가족의 의료비는 한도가 없어요. 실손보험으로 돌려받은 금액은 빼요." />
+          <MoneyInput id="medicalOther" label="의료비: 그 외 가족" value={d.medicalOther} hint="연 700만 원까지만 공제 대상이에요." />
+          <MoneyInput id="eduSelf" label="교육비: 본인" value={d.eduSelf} hint="대학원·직업능력개발 훈련비도 해당해요. 한도가 없어요." />
+          <MoneyInput id="eduKids" label="교육비: 취학 전·초중고 자녀 합계" value={d.eduKids} hint="1인당 300만 원까지 공제 대상이에요." />
+          <Stepper id="eduKidsCount" label="교육비를 쓴 취학 전·초중고 자녀 수" value={d.eduKidsCount} min={0} max={10} />
+          <MoneyInput id="eduUniv" label="교육비: 대학생 자녀 합계" value={d.eduUniv} hint="1인당 900만 원까지 공제 대상이에요." />
+          <Stepper id="eduUnivCount" label="교육비를 쓴 대학생 자녀 수" value={d.eduUnivCount} min={0} max={10} />
+          <MoneyInput id="insurance" label="보장성 보험료" value={d.insurance} hint="자동차보험, 실손·상해·질병 보험 등이에요. 연 100만 원까지 공제 대상이에요." />
+          <MoneyInput id="donation" label="기부금" value={d.donation} hint="종교·공익 단체 등에 낸 일반 기부금이에요." />
+        </Details>
+
+        <Details summary="연금저축·IRP·주택청약">
+          <MoneyInput id="pensionSaving" label="연금저축 납입액 (연)" value={d.pensionSaving} hint="연 600만 원까지 공제 대상이에요." />
+          <MoneyInput id="irp" label="IRP(퇴직연금) 납입액 (연)" value={d.irp} hint="연금저축과 합쳐 연 900만 원까지 공제 대상이에요." />
+          <MoneyInput id="housingSubscription" label="주택청약종합저축 납입액 (연)" value={d.housingSubscription} hint="총급여 7,000만 원 이하 무주택 세대주만 해당해요. 연 300만 원까지 40%를 소득에서 빼요." />
+        </Details>
+
+        <Details summary="월세·결혼">
+          <MoneyInput id="rent" label="월세 납입액 (연)" value={d.rent} hint="총급여 8,000만 원 이하 무주택 세대주만 해당해요. 연 1,000만 원까지 공제 대상이에요." />
+          <div class="check-field">
+            <label class="check"><input type="checkbox" id="married" name="married" /><span>2026년에 혼인신고를 했어요</span></label>
+            <p class="hint caption">결혼세액공제 50만 원이에요. 2024~2026년 혼인신고 1회만 가능해요.</p>
+          </div>
+        </Details>
+
+        <div class="actions">
+          <Button type="submit" variant="primary" class="sr-only-focusable">계산하기</Button>
+          <Button variant="text" size="s" data-reset><RotateCcw />초기화</Button>
+        </div>
+      </div>
+    </form>
+  </section>
+
+  <Section id="detail" title={`결과 상세 (${YE_BASE_YEAR}년 귀속)`}>
+    <ResultTable
+      caption={out.tableCaption}
+      captionOut="tableCaption"
+      rows={YE_ROWS.map(rowOf)}
+      totals={YE_TOTAL_ROWS.map(rowOf)}
+    />
+    <p class="small muted path-note" data-out="pathNote">{out.pathNote}</p>
+
+    <h3>카드 소득공제 계산 내역</h3>
+    <div class="table-scroll" tabindex="0" role="region" aria-label="카드 소득공제 계산 내역 (가로로 스크롤할 수 있어요)">
+      <table class="card-table">
+        <caption>총 사용액에서 최저사용금액을 빼고 공제율을 곱해요</caption>
+        <tbody>
+          <tr><th scope="row">총 사용액</th><td class="num" data-out="cardUsage">{out.cardUsage}</td></tr>
+          <tr><th scope="row">최저사용금액 (총급여의 25%)</th><td class="num" data-out="cardMin">{out.cardMin}</td></tr>
+          <tr><th scope="row">신용카드 공제 (15%)</th><td class="num" data-out="cardCredit">{out.cardCredit}</td></tr>
+          <tr><th scope="row">체크카드·현금영수증 공제 (30%)</th><td class="num" data-out="cardDebit">{out.cardDebit}</td></tr>
+          <tr><th scope="row">문화·체육 공제 (30%)</th><td class="num" data-out="cardCulture">{out.cardCulture}</td></tr>
+          <tr><th scope="row">전통시장·대중교통 공제 (40%)</th><td class="num" data-out="cardMarketTransit">{out.cardMarketTransit}</td></tr>
+          <tr><th scope="row">한도 적용 전 합계</th><td class="num" data-out="cardBefore">{out.cardBefore}</td></tr>
+          <tr><th scope="row">기본한도</th><td class="num" data-out="cardBase">{out.cardBase}</td></tr>
+          <tr><th scope="row">추가한도 (전통시장·대중교통·문화)</th><td class="num" data-out="cardExtra">{out.cardExtra}</td></tr>
+        </tbody>
+        <tfoot><tr><th scope="row">최종 카드 소득공제</th><td class="num" data-out="cardFinal">{out.cardFinal}</td></tr></tfoot>
+      </table>
+    </div>
+    <p class="small muted" data-out="cardNote">{out.cardNote}</p>
+
+    <h3>계산된 사실로 보는 공제 현황</h3>
+    <ul class="hints">
+      {[1, 2, 3].map((n) => <li data-hint hidden={!hints[n - 1]}><span data-out={`hint${n}`}>{hints[n - 1] ?? ''}</span></li>)}
+    </ul>
+
+    <div class="share">
+      <CopyButton />
+      <ShareButton />
+    </div>
+    <p class="small muted">참고용 계산이에요. 실제 정산은 회사·국세청 기준으로 확정돼요. 정확한 금액은 홈택스 <a href="https://www.hometax.go.kr/" target="_blank" rel="noopener noreferrer">연말정산 미리보기<ExternalLink /><span class="sr-only"> (새 창)</span></a>에서 확인해 보세요.</p>
+  </Section>
+
+  <AdSlot slot="after-result" />
+
+  <Section id="usage" title="사용법">
+    <p>
+      이 계산기는 {YE_BASE_YEAR}년 1~12월에 번 소득을 2027년 1~2월에 정산하는 연말정산을 기준으로 해요. 아직 한 해가 끝나지 않았다면 지금까지의 금액과 남은 달 예상을 합쳐서 넣어 보세요.
+    </p>
+    <Steps items={[
+      { title: '세전 연봉을 넣어요', body: '근로계약서나 원천징수영수증의 총급여 기준 연봉을 넣어요. 식대처럼 세금이 붙지 않는 월 비과세액은 기본값 20만 원이고, 급여명세서를 보고 바꿀 수 있어요.' },
+      { title: '가족과 자녀 수를 맞춰요', body: '본인을 포함해 기본공제를 받는 인원을 고르고, 70세 이상·장애인·자녀 나이대별 인원을 나눠 넣어요. 자녀 나이는 만 나이이고 올해 12월 31일 기준이에요.' },
+      { title: '카드 사용액과 지출을 홈택스 자료로 채워요', body: '홈택스 연말정산 간소화 서비스에서 신용카드, 체크카드·현금영수증, 대중교통, 의료비, 교육비, 보험료, 기부금 금액을 확인해서 넣어요. 간소화 자료는 보통 1월 중순에 열려요.' },
+      { title: '이미 낸 세금을 넣어요', body: '12월 급여명세서나 원천징수영수증의 소득세 합계를 넣으면 가장 정확해요. 모르면 비워 두세요. 연봉으로 추정한 값으로 계산하고 추정치라고 알려 드려요.' },
+      { title: '결과를 확인하고 나눠요', body: '값을 바꾸면 결과가 바로 바뀌어요. 표에서 어떤 공제가 얼마나 반영됐는지 따라가 보고, 복사하기나 링크 공유로 같은 결과를 보낼 수 있어요.' },
+    ]} />
+  </Section>
+
+  <Section id="method" title="계산 방식과 근거">
+    <p>
+      돈셈은 소득세법의 연말정산 순서대로 계산해요. 먼저 연봉에서 비과세를 뺀 총급여를 구하고, 근로소득공제를 빼서 근로소득금액을 만들어요. 여기서 인적공제, 국민연금·건강보험 등 보험료 공제, 주택청약 공제, 카드 소득공제를 빼면 세금을 매기는 기준인 과세표준이 돼요. 과세표준에 기본세율을 곱한 산출세액에서 세액공제를 빼면 최종으로 내야 할 결정세액이고, 지방소득세는 결정세액의 10%예요. 마지막으로 이미 낸 세금과 비교해서 환급인지 추가 납부인지 보여 드려요.
+    </p>
+    <p>
+      국민연금·건강보험·고용보험은 연봉으로 추정한 연간 본인 부담액을 쓰고, 실제 금액을 입력하면 그 값으로 바꿔요. 소득세·지방소득세는 10원 미만을 버려요. 세액공제 합계가 산출세액보다 커도 결정세액은 0원보다 내려가지 않아요.
+    </p>
+    <h3>기본세율 (소득세법 제55조)</h3>
+    <DataTable
+      caption="과세표준 구간별 세율과 누진공제"
+      columns={[{ key: 'range', label: '과세표준' }, { key: 'rate', label: '세율', align: 'right' }, { key: 'deduction', label: '누진공제', align: 'right' }]}
+      rows={bracketRows}
+    />
+    <h3>카드 소득공제 (조세특례제한법 제126조의2)</h3>
+    <p>총급여의 25%를 최저사용금액으로 보고, 이 금액까지는 공제율이 낮은 순서(신용카드, 체크카드·현금영수증, 문화, 전통시장·대중교통)로 먼저 채워요. 그다음 사용액부터 아래 공제율을 곱해요.</p>
+    <DataTable caption="사용 종류별 공제율" columns={[{ key: 'item', label: '사용 종류' }, { key: 'rate', label: '공제율', align: 'right' }]} rows={cardRateRows} />
+    <p>공제액에는 기본한도가 있고, 전통시장·대중교통·문화 공제액은 기본한도를 넘어도 추가한도(총급여 7,000만 원 이하 300만 원, 초과 200만 원)까지 더 공제돼요. 2026년 귀속부터 기본공제를 받는 자녀가 있으면 기본한도가 늘어나요.</p>
+    <DataTable
+      caption="카드 소득공제 기본한도 (기본공제 자녀 수별)"
+      columns={[{ key: 'salary', label: '총급여' }, { key: 'c0', label: '자녀 없음', align: 'right' }, { key: 'c1', label: '자녀 1명', align: 'right' }, { key: 'c2', label: '자녀 2명 이상', align: 'right' }]}
+      rows={cardLimitRows}
+    />
+    <h3>세액공제</h3>
+    <DataTable
+      caption="돈셈이 반영하는 세액공제"
+      columns={[{ key: 'item', label: '항목' }, { key: 'rule', label: '내용' }, { key: 'basis', label: '근거' }]}
+      rows={creditRows}
+    />
+    <p>
+      인적공제는 기본공제 1인당 {man(PERSONAL.basicPerPerson)}이고, 70세 이상은 {man(PERSONAL.seniorExtra)}, 장애인은 {man(PERSONAL.disabledExtra)}을 추가로 빼요. 주택청약종합저축은 총급여 7,000만 원 이하 무주택 세대주가 연 300만 원까지 납입액의 40%를 소득에서 뺄 수 있어요.
+    </p>
+    <h3>{YE_BASE_YEAR}년 귀속에서 달라진 점</h3>
+    <ul>
+      <li>카드 소득공제 기본한도가 기본공제 자녀 1인당 50만 원(최대 100만 원) 늘어났어요. 총급여 7,000만 원 초과는 25만 원(최대 50만 원)이에요.</li>
+      <li>초등학교 1~2학년(만 9세 미만) 자녀의 예체능 학원비가 교육비 세액공제에 포함돼요.</li>
+      <li>자녀세액공제 대상이 만 {CHILD_CREDIT.minAge}세 이상 자녀예요.</li>
+      <li>무주택 주말부부도 각각 월세 세액공제를 받을 수 있어요. 부부 합산 한도는 연 1,000만 원이에요.</li>
+    </ul>
+    <h3>공식 계산과 차이가 날 수 있는 이유</h3>
+    <p>부양가족의 소득 요건, 카드 종류별 정확한 분류, 월 중 입사·퇴사, 상여금 시기에 따른 기납부세액, 이 계산기가 다루지 않는 공제 때문에 실제 결과와 차이가 날 수 있어요. 돈셈은 홈택스 연말정산 미리보기와 같은 입력값으로 비교한 결과를 따로 기록해 두고 있어요.</p>
+    <h3>출처</h3>
+    <SourceList sources={[...YE_SOURCES]} asOf={YE_AS_OF} />
+    <p class="small muted">기준 연도는 {YE_BASE_YEAR}년 귀속이에요. 근로소득공제·기본세율·근로소득세액공제와 4대보험 요율은 <a href="/salary/">연봉 실수령액 계산기</a>와 같은 값을 써요.</p>
+  </Section>
+
+  <Section id="examples" title="예시">
+    <p>이미 낸 소득세는 연봉으로 추정했고, 월 비과세 20만 원, 카드는 기본 사용액(신용 1,200만 원·체크 400만 원·대중교통 60만 원) 기준이에요. 예시 2는 카드 사용액만 다르게 넣었어요.</p>
+    <DataTable
+      caption="입력 조건별 연말정산 결과 예시"
+      columns={[{ key: 'item', label: '항목' }, ...examples.map((e, i) => ({ key: `e${i}`, label: e.name, align: 'right' as const }))]}
+      rows={exampleRows}
+    />
+    <p>같은 연봉이라도 카드 사용액이 최저사용금액(총급여의 25%)을 넘는지, 부양가족이 몇 명인지에 따라 결과가 크게 달라져요. 예시 3처럼 소득이 높은 경우 카드 사용이 최저사용금액에 못 미치면 카드 공제가 없어서, 연금저축 같은 세액공제의 비중이 커져요.</p>
+  </Section>
+
+  <AdSlot slot="mid-content" />
+
+  <Section id="faq" title="자주 묻는 질문">
+    <FaqList items={faqs} />
+  </Section>
+
+  <Section id="related" title="관련 계산기">
+    <div class="related-grid"><ToolCard tool={salaryTool} /></div>
+    <p class="small muted">종합소득세 계산기와 퇴직소득세 계산기는 준비 중이에요. <a href="/tax/">{taxCat.name} 계산기 모음</a>에서 새 계산기를 확인해 보세요.</p>
+  </Section>
+
+  <Section id="notice" title="안내와 변경 이력">
+    <Notice variant="warning" title="참고용 안내">
+      <p>이 계산기의 결과는 입력한 값과 일반적인 기준으로 계산한 참고용 추정치이고 실제 연말정산 결과와 다를 수 있어요. 세무·법률 자문이 아니에요.</p>
+      <p>중요한 결정 전에는 회사 담당자나 국세청 홈택스의 연말정산 미리보기, 세무 전문가에게 확인해 주세요. 기준값 중 법령 원문 대조가 끝나지 않은 값이 있어서 확인이 끝나는 대로 갱신해요.</p>
+    </Notice>
+    <p class="small muted">최종 갱신일 <time datetime={tool.updated}>{tool.updated}</time> · 오류를 발견했다면 <a href="/contact/">문의 페이지</a>로 알려 주세요. 48시간 안에 확인하고 수정하면 아래에 기록해요.</p>
+    <ChangeLog items={changelog} />
+  </Section>
+
+  <StickyResultBar label={out.heroLabel} labelOut="stickyLabel" out="diffAbs" value={out.diffAbs} />
+  <Toast />
+</BaseLayout>
+<style>
+  .calc { padding-top: 0; padding-bottom: var(--space-8); }
+  .main-input > :global(.field) { margin-bottom: var(--space-4); }
+  .result { margin-bottom: var(--space-8); }
+  .cond h3 { margin-bottom: var(--space-5); }
+  .disclaimer { margin: var(--space-2) 0 0; }
+  .badge { display: flex; align-items: center; gap: var(--space-2); margin: var(--space-3) 0 0; color: var(--color-on-primary-weak); font-weight: 600; }
+  .ic { display: inline-flex; }
+  :global([data-hero][data-kind='refund']) .ic-extra,
+  :global([data-hero][data-kind='extra']) .ic-refund,
+  :global([data-hero][data-kind='even']) .ic-refund { display: none; }
+  .actions { display: flex; align-items: center; justify-content: flex-end; gap: var(--space-3); }
+  .share { display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-2); margin: var(--space-5) 0 var(--space-4); }
+  .path-note { margin-top: var(--space-3); }
+  .check-field { margin-bottom: var(--space-6); }
+  .check { display: flex; align-items: center; gap: var(--space-3); min-height: var(--btn-m); padding: var(--space-2) var(--space-4); border-radius: var(--radius-md); background: var(--color-bg-sub); font-weight: 600; font-size: var(--fs-body-2); cursor: pointer; }
+  .check input { width: 24px; height: 24px; margin: 0; accent-color: var(--color-primary); flex: none; }
+  .hint { margin: var(--space-2) 0 0; color: var(--color-text-tertiary); }
+  .table-scroll { overflow-x: auto; margin-bottom: var(--space-2); }
+  .card-table { width: 100%; border-collapse: collapse; font-size: var(--fs-body-2); line-height: var(--lh-body-2); }
+  .card-table caption { text-align: left; padding: 0 0 var(--space-2); color: var(--color-text-sub); caption-side: top; }
+  .card-table th, .card-table td { padding: var(--space-2) 0; text-align: left; border: 0; }
+  .card-table th { font-weight: 400; color: var(--color-text-sub); }
+  .card-table td { text-align: right; padding-left: var(--space-3); }
+  .card-table tfoot tr th, .card-table tfoot tr td { border-top: 1px solid var(--color-line); font-weight: 700; color: var(--color-text); }
+  .hints { padding-left: var(--space-5); margin-bottom: var(--space-4); font-size: var(--fs-body-2); line-height: var(--lh-body-2); color: var(--color-text-sub); }
+  .related-grid { display: grid; gap: var(--space-3); grid-template-columns: 1fr; margin-bottom: var(--space-4); }
+</style>
+<script>
+  import '../../scripts/year-end-tax-tool';
+</script>
