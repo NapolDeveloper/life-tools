@@ -45,7 +45,7 @@ paths:
 | `text-sub` | grey-700 #4d5853 | #a3aea9 | 설명·라벨 |
 | `text-tertiary` | grey-600 #6a7570 | #8c9792 | 캡션·힌트 (흰/grey-50 위에서만) |
 | `line` | grey-200 #e4e8e6 | #2b3430 | 구분선(장식) |
-| `line-strong` | grey-500 #89938e | #5c6863 | 입력 외곽이 필요할 때(3:1) |
+| `line-strong` | grey-500 #89938e | #6b7873 | 입력 외곽이 필요할 때(모든 배경에서 3:1 이상) |
 | `primary` | green-600 #067f4d | #3fd38b | 주 버튼 배경·링크·핵심 숫자 |
 | `primary-pressed` | green-700 #067043 | #24b871 | 눌림 |
 | `primary-weak` | green-50 #ebfaf2 | #163526 | 보조 버튼 배경·결과 카드 배경 |
