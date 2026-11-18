@@ -5,4 +5,4 @@ import Copy from '../icons/Copy.astro';
 interface Props { label?: string }
 const { label = '복사하기' } = Astro.props;
 ---
-<Button variant="secondary" data-copy-result><Copy />{label}</Button>
+<Button variant="weak" block data-copy-result><Copy />{label}</Button>

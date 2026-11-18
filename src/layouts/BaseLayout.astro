@@ -83,11 +83,20 @@ const useGa = IS_PRODUCTION && GA4_ID !== '';
   </head>
   <body>
     <a class="skip-link" href="#main">본문 바로가기</a>
+    <div class="top-sentinel" id="top-sentinel" aria-hidden="true"></div>
     <SiteHeader />
     <main id="main">
       {crumbs.length > 0 && <Breadcrumb items={crumbs} />}
       <slot />
     </main>
     <SiteFooter />
+    <script is:inline>
+      /* 헤더 하단 1px 선은 스크롤했을 때만 */
+      (function () {
+        var h = document.querySelector('[data-site-header]'), s = document.getElementById('top-sentinel');
+        if (!h || !s || !('IntersectionObserver' in window)) return;
+        new IntersectionObserver(function (e) { h.classList.toggle('scrolled', !e[0].isIntersecting); }).observe(s);
+      })();
+    </script>
   </body>
 </html>

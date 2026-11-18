@@ -1,90 +1,114 @@
 /*
- * 디자인 토큰 (site-03-design-system §2~4). 컴포넌트에는 색·px을 직접 쓰지 않고 이 토큰만 쓴다.
- * 새 색이 필요하면 여기에 먼저 추가하고 대비를 검증한다(src/styles/tokens.test.ts).
+ * 디자인 토큰 v2 (.claude/rules/site-03-design-system.md §2~4). 원본은 이 파일이다.
+ * - 원색 팔레트(--green-*, --grey-*)는 의미 토큰의 값으로만 쓴다. 컴포넌트는 의미 토큰(--color-*)만 쓴다.
+ * - green-400·500은 아이콘·장식·그래프 전용(텍스트 금지).
+ * - 새 색이 필요하면 여기에 먼저 추가하고 대비를 검증한다(src/styles/tokens.test.ts).
  */
 :root {
   color-scheme: light dark;
 
-  /* 색 — 라이트 */
-  --color-bg: #f6f8f7;
+  /* 원색 팔레트 */
+  --green-50: #ebfaf2;
+  --green-100: #d2f4e2;
+  --green-200: #a6e8c6;
+  --green-300: #6fd8a3;
+  --green-400: #33c17f;
+  --green-500: #14a865;
+  --green-600: #067f4d;
+  --green-700: #067043;
+  --green-800: #065a37;
+  --green-900: #05432a;
+  --grey-50: #f8faf9;
+  --grey-100: #f1f4f3;
+  --grey-200: #e4e8e6;
+  --grey-300: #d0d6d3;
+  --grey-400: #aeb7b3;
+  --grey-500: #89938e;
+  --grey-600: #6a7570;
+  --grey-700: #4d5853;
+  --grey-800: #323b37;
+  --grey-900: #1a201d;
+
+  /* 의미 토큰 — 라이트 */
+  --color-bg: #ffffff;
+  --color-bg-sub: var(--grey-100);
   --color-surface: #ffffff;
-  --color-surface-2: #eef2f0;
-  --color-text: #14201b;
-  --color-text-muted: #4f5d57;
-  --color-border: #d9e1dd;
-  --color-border-strong: #7f8d87;
-  --color-primary: #0b7a4b;
-  --color-primary-hover: #08643d;
-  --color-primary-soft: #e6f4ec;
+  --color-surface-sub: var(--grey-50);
+  --color-text: var(--grey-900);
+  --color-text-sub: var(--grey-700);
+  --color-text-tertiary: var(--grey-600);
+  --color-line: var(--grey-200);
+  --color-line-strong: var(--grey-500);
+  --color-primary: var(--green-600);
+  --color-primary-pressed: var(--green-700);
+  --color-primary-weak: var(--green-50);
   --color-on-primary: #ffffff;
+  --color-on-primary-weak: var(--green-700);
   --color-danger: #c4302b;
   --color-warning: #8f5400;
-  --color-info: #2152d9;
 
-  /* 타이포그래피 */
+  /* 타이포그래피 (Pretendard) */
   --font-sans: 'Pretendard Variable', Pretendard, -apple-system, BlinkMacSystemFont, 'Apple SD Gothic Neo', 'Noto Sans KR', 'Malgun Gothic', system-ui, sans-serif;
-  --text-display: 2.25rem;
-  --text-display-weight: 800;
-  --text-display-lh: 1.2;
-  --text-h1: 1.75rem;
-  --text-h1-weight: 700;
-  --text-h1-lh: 1.3;
-  --text-h2: 1.375rem;
-  --text-h2-weight: 700;
-  --text-h2-lh: 1.4;
-  --text-h3: 1.125rem;
-  --text-h3-weight: 600;
-  --text-h3-lh: 1.4;
-  --text-body: 1rem;
-  --text-body-weight: 400;
-  --text-body-lh: 1.7;
-  --text-small: 0.875rem;
-  --text-small-weight: 400;
-  --text-small-lh: 1.6;
+  --fs-display: 34px; --lh-display: 44px; --fw-display: 700;
+  --fs-title-1: 26px; --lh-title-1: 36px; --fw-title-1: 700;
+  --fs-title-2: 22px; --lh-title-2: 31px; --fw-title-2: 700;
+  --fs-title-3: 19px; --lh-title-3: 27px; --fw-title-3: 600;
+  --fs-body-1: 17px; --lh-body-1: 26px; --fw-body-1: 400;
+  --fs-body-2: 15px; --lh-body-2: 23px; --fw-body-2: 400;
+  --fs-caption: 13px; --lh-caption: 19px; --fw-caption: 400;
+  --tracking-title: -0.02em;
 
-  /* 간격 (4px 기반) */
+  /* 간격 */
   --space-1: 4px;
   --space-2: 8px;
   --space-3: 12px;
   --space-4: 16px;
-  --space-5: 24px;
-  --space-6: 32px;
-  --space-7: 48px;
-  --space-8: 64px;
+  --space-5: 20px;
+  --space-6: 24px;
+  --space-7: 32px;
+  --space-8: 40px;
+  --space-9: 48px;
+  --space-10: 64px;
 
-  /* 모양 */
+  /* 모서리 */
   --radius-sm: 8px;
   --radius-md: 12px;
   --radius-lg: 16px;
+  --radius-xl: 20px;
   --radius-full: 9999px;
-  --shadow-sticky: 0 -2px 12px rgb(0 0 0 / 0.12);
+
+  /* 버튼 높이 */
+  --btn-l: 56px;
+  --btn-m: 48px;
+  --btn-s: 36px;
 
   /* 레이아웃·터치·모션 */
-  --content-max: 720px;
-  --wide-max: 960px;
-  --gutter: 16px;
+  --content-max: 640px;
+  --gutter: 20px;
   --touch-min: 44px;
-  --touch-sm: 36px;
   --duration-fast: 150ms;
-  --duration-base: 300ms;
+  --duration-base: 250ms;
+  --ease: ease-out;
+  --press-scale: 0.98;
 }
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --color-bg: #0e1412;
-    --color-surface: #151d1a;
-    --color-surface-2: #1c2622;
-    --color-text: #e7eeea;
-    --color-text-muted: #9fb0a8;
-    --color-border: #2a3631;
-    --color-border-strong: #61716a;
-    --color-primary: #3fcf8e;
-    --color-primary-hover: #62dba3;
-    --color-primary-soft: #173327;
+    --color-bg: #111614;
+    --color-bg-sub: #1a201d;
+    --color-surface: #1a201d;
+    --color-surface-sub: #232b27;
+    --color-text: #eef2f0;
+    --color-text-sub: #a3aea9;
+    --color-text-tertiary: #8c9792;
+    --color-line: #2b3430;
+    --color-line-strong: #5c6863;
+    --color-primary: #3fd38b;
+    --color-primary-pressed: #24b871;
+    --color-primary-weak: #163526;
     --color-on-primary: #06140d;
+    --color-on-primary-weak: #3fd38b;
     --color-danger: #ff7b72;
     --color-warning: #f0b44c;
-    --color-info: #7aa2ff;
-    --shadow-sticky: 0 -2px 12px rgb(0 0 0 / 0.5);
   }
 }

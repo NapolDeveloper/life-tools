@@ -11,12 +11,12 @@ const { slot = 'after-result' } = Astro.props;
 ---
 {!IS_PRODUCTION && (
   <aside class="ad" data-ad-slot={slot} aria-label="광고 자리 (미리보기)">
-    <p class="ad-label">광고</p>
+    <p class="ad-label caption tertiary">광고</p>
     <div class="ad-box" />
   </aside>
 )}
 <style>
-  .ad { margin: var(--space-6) 0; max-width: var(--content-max); }
-  .ad-label { margin: 0 0 var(--space-1); font-size: var(--text-small); color: var(--color-text-muted); }
-  .ad-box { height: 280px; background: var(--color-surface-2); border: 1px dashed var(--color-border-strong); border-radius: var(--radius-md); }
+  .ad { padding-top: var(--space-6); padding-bottom: var(--space-6); }
+  .ad-label { margin: 0 0 var(--space-1); }
+  .ad-box { height: 280px; background: var(--color-bg-sub); border-radius: var(--radius-lg); }
 </style>

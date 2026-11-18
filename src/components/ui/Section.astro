@@ -1,14 +1,18 @@
 ---
-/** H2 블록. 페이지 구조(site-01 §2)의 한 칸. */
-interface Props { title: string; id?: string; wide?: boolean }
-const { title, id, wide = false } = Astro.props;
+/**
+ * H2 블록. 페이지 구조(site-01 §2)의 한 칸. 위에 12px bg-sub 띠(전체 폭)를 두어 구분한다.
+ * 페이지 첫 블록이거나 띠가 필요 없으면 band={false}.
+ */
+interface Props { title: string; id?: string; wide?: boolean; band?: boolean }
+const { title, id, band = true } = Astro.props;
 ---
-<section class:list={['section', { prose: !wide }]} aria-labelledby={id ? `${id}-title` : undefined} id={id}>
+{band && <div class="band" aria-hidden="true"></div>}
+<section class="section" aria-labelledby={id ? `${id}-title` : undefined} id={id}>
   <h2 id={id ? `${id}-title` : undefined}>{title}</h2>
   <slot />
 </section>
 <style>
-  .section { margin-top: var(--space-7); }
-  h2 { margin-bottom: var(--space-3); }
-  .section :global(h3) { margin: var(--space-5) 0 var(--space-2); }
+  .section { padding-top: var(--space-8); padding-bottom: var(--space-8); }
+  h2 { margin-bottom: var(--space-4); }
+  .section :global(h3) { margin: var(--space-6) 0 var(--space-2); }
 </style>

@@ -1,9 +1,10 @@
-/* 전역 기본 스타일. 색·크기는 tokens.css의 토큰만 사용한다. */
+/* 전역 기본 스타일. 색·크기·간격은 tokens.css의 의미 토큰만 쓴다. */
 *, *::before, *::after { box-sizing: border-box; }
 
 html {
   -webkit-text-size-adjust: 100%;
-  scroll-padding-bottom: calc(var(--touch-min) * 2 + var(--space-4));
+  scroll-padding-top: calc(var(--btn-m) + var(--space-4));
+  scroll-padding-bottom: calc(var(--btn-l) + var(--space-6));
 }
 
 body {
@@ -11,9 +12,9 @@ body {
   background: var(--color-bg);
   color: var(--color-text);
   font-family: var(--font-sans);
-  font-size: var(--text-body);
-  font-weight: var(--text-body-weight);
-  line-height: var(--text-body-lh);
+  font-size: var(--fs-body-1);
+  font-weight: var(--fw-body-1);
+  line-height: var(--lh-body-1);
   word-break: keep-all;
   overflow-wrap: break-word;
   text-rendering: optimizeLegibility;
@@ -24,27 +25,40 @@ body {
   min-height: 100dvh;
 }
 
-main { flex: 1; width: 100%; max-width: var(--wide-max); margin: 0 auto; padding: var(--space-4) var(--gutter) var(--space-7); }
+/* 본문 열: main의 직계 자식은 모두 640px 폭 + 좌우 여백 20px. 섹션 사이 띠(.band)만 전체 폭. */
+main { flex: 1; width: 100%; padding-bottom: var(--space-9); }
+main > * {
+  width: 100%;
+  max-width: calc(var(--content-max) + var(--gutter) * 2);
+  margin-inline: auto;
+  padding-inline: var(--gutter);
+}
+main > .band { max-width: none; padding-inline: 0; }
 
-h1, h2, h3 { margin: 0; color: var(--color-text); }
-h1 { font-size: var(--text-h1); font-weight: var(--text-h1-weight); line-height: var(--text-h1-lh); }
-h2 { font-size: var(--text-h2); font-weight: var(--text-h2-weight); line-height: var(--text-h2-lh); }
-h3 { font-size: var(--text-h3); font-weight: var(--text-h3-weight); line-height: var(--text-h3-lh); }
+/* 섹션 사이 12px bg-sub 띠 */
+.band { height: 12px; background: var(--color-bg-sub); margin: 0; }
+
+h1, h2, h3 { margin: 0; color: var(--color-text); letter-spacing: var(--tracking-title); }
+h1 { font-size: var(--fs-title-1); font-weight: var(--fw-title-1); line-height: var(--lh-title-1); }
+h2 { font-size: var(--fs-title-2); font-weight: var(--fw-title-2); line-height: var(--lh-title-2); }
+h3 { font-size: var(--fs-title-3); font-weight: var(--fw-title-3); line-height: var(--lh-title-3); }
 p { margin: 0 0 var(--space-4); }
-ul, ol { margin: 0 0 var(--space-4); padding-left: var(--space-5); }
+ul, ol { margin: 0 0 var(--space-4); padding-left: var(--space-6); }
 li { margin-bottom: var(--space-1); }
 
 a { color: var(--color-primary); text-decoration: underline; text-underline-offset: 0.18em; }
-a:hover { color: var(--color-primary-hover); }
+a:hover { color: var(--color-primary-pressed); }
 
-:focus-visible { outline: 3px solid var(--color-primary); outline-offset: 2px; border-radius: var(--radius-sm); }
+:focus-visible { outline: 2px solid var(--color-primary); outline-offset: 2px; border-radius: var(--radius-sm); }
 
 img, svg { max-width: 100%; }
 button, input, select, textarea { font: inherit; color: inherit; }
 
 .num { font-variant-numeric: tabular-nums; }
-.muted { color: var(--color-text-muted); }
-.small { font-size: var(--text-small); line-height: var(--text-small-lh); }
+.muted { color: var(--color-text-sub); }
+.tertiary { color: var(--color-text-tertiary); }
+.small { font-size: var(--fs-body-2); line-height: var(--lh-body-2); }
+.caption { font-size: var(--fs-caption); line-height: var(--lh-caption); }
 
 .sr-only {
   position: absolute; width: 1px; height: 1px; margin: -1px; padding: 0;
@@ -62,8 +76,8 @@ button, input, select, textarea { font: inherit; color: inherit; }
 }
 .skip-link:focus { top: var(--space-2); color: var(--color-on-primary); }
 
-/* 본문 텍스트 폭 */
-.prose { max-width: var(--content-max); }
+/* 스크롤 감지용 센티널 (헤더 하단선 토글) */
+.top-sentinel { position: absolute; top: 0; left: 0; width: 1px; height: 1px; pointer-events: none; }
 
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after {
@@ -74,11 +88,8 @@ button, input, select, textarea { font: inherit; color: inherit; }
   }
 }
 
-@media (min-width: 768px) {
-  main { padding-top: var(--space-5); }
-}
-
 /* 문서형 페이지(소개·약관·방침) 본문 */
-.doc h2 { margin: var(--space-6) 0 var(--space-2); }
-.doc h3 { margin: var(--space-5) 0 var(--space-2); }
+.doc { padding-top: var(--space-2); }
+.doc h2 { margin: var(--space-8) 0 var(--space-3); }
+.doc h3 { margin: var(--space-6) 0 var(--space-2); }
 .doc ul, .doc ol { margin-bottom: var(--space-4); }

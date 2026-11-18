@@ -15,10 +15,10 @@ const { items } = Astro.props;
   </ol>
 </nav>
 <style>
-  .breadcrumb { margin-bottom: var(--space-3); }
-  ol { list-style: none; display: flex; flex-wrap: wrap; align-items: center; gap: 0 var(--space-1); margin: 0; padding: 0; font-size: var(--text-small); line-height: var(--text-small-lh); }
-  li { display: inline-flex; align-items: center; gap: var(--space-1); margin: 0; color: var(--color-text-muted); }
-  a { display: inline-flex; align-items: center; min-height: var(--touch-sm); color: var(--color-text-muted); }
-  a:hover { color: var(--color-primary); }
+  .breadcrumb { padding-top: var(--space-2); }
+  ol { list-style: none; display: flex; flex-wrap: wrap; align-items: center; gap: 0 var(--space-1); margin: 0; padding: 0; font-size: var(--fs-caption); line-height: var(--lh-caption); }
+  li { display: inline-flex; align-items: center; gap: var(--space-1); margin: 0; color: var(--color-text-sub); }
+  a { display: inline-flex; align-items: center; min-height: var(--btn-s); color: var(--color-text-sub); text-decoration: none; }
+  a:hover { color: var(--color-primary); text-decoration: underline; }
   [aria-current='page'] { color: var(--color-text); font-weight: 600; }
 </style>

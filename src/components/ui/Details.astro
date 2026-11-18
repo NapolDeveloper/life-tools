@@ -1,6 +1,6 @@
 ---
 import ChevronDown from '../icons/ChevronDown.astro';
-/** 접기·펼치기 (상세 옵션 등). 네이티브 details/summary라 키보드·스크린리더 기본 지원. */
+/** 접기·펼치기 (상세 옵션 등). 네이티브 details/summary라 키보드·스크린리더 기본 지원. 면(bg-sub)으로 구분하고 테두리는 없다. */
 interface Props { summary: string; open?: boolean }
 const { summary, open = false } = Astro.props;
 ---
@@ -9,13 +9,17 @@ const { summary, open = false } = Astro.props;
   <div class="body"><slot /></div>
 </details>
 <style>
-  .details { border: 1px solid var(--color-border); border-radius: var(--radius-md); background: var(--color-surface); margin-bottom: var(--space-4); }
+  .details { margin-bottom: var(--space-4); }
   summary {
     display: flex; align-items: center; justify-content: space-between; gap: var(--space-2);
-    min-height: var(--touch-min); padding: var(--space-2) var(--space-4); font-weight: 600; cursor: pointer; list-style: none;
+    min-height: var(--btn-m); padding: var(--space-2) var(--space-4); border-radius: var(--radius-md);
+    background: var(--color-bg-sub); font-weight: 600; font-size: var(--fs-body-2); cursor: pointer; list-style: none;
+    transition: transform var(--duration-fast) var(--ease);
   }
   summary::-webkit-details-marker { display: none; }
-  summary :global(svg) { transition: transform var(--duration-fast); color: var(--color-text-muted); }
+  summary :global(svg) { transition: transform var(--duration-fast) var(--ease); color: var(--color-text-sub); }
   .details[open] summary :global(svg) { transform: rotate(180deg); }
-  .body { padding: var(--space-2) var(--space-4) var(--space-1); border-top: 1px solid var(--color-border); padding-top: var(--space-4); }
+  .body { padding: var(--space-6) 0 0; }
+  .body > :global(:last-child) { margin-bottom: 0; }
+  @media (prefers-reduced-motion: no-preference) { summary:active { transform: scale(var(--press-scale)); } }
 </style>

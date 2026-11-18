@@ -1,5 +1,8 @@
 ---
-/** 빠른 입력 칩. add는 현재 값에 더하고, set은 그 값으로 바꾼다. 동작은 입력 페이지 스크립트가 data 속성으로 처리한다. */
+/**
+ * 빠른 입력 칩. add는 현재 값에 더하고, set은 그 값으로 바꾼다. 동작은 입력 페이지 스크립트가 data 속성으로 처리한다.
+ * set 칩은 현재 값과 같으면 스크립트가 aria-pressed="true"로 바꿔 선택 상태(primary-weak)를 보여 준다.
+ */
 export interface ChipItem { label: string; add?: number; set?: number }
 interface Props { target: string; items: ChipItem[]; label?: string }
 const { target, items, label = '빠른 입력' } = Astro.props;
@@ -12,17 +15,26 @@ const { target, items, label = '빠른 입력' } = Astro.props;
       data-chip-target={target}
       data-chip-add={c.add}
       data-chip-set={c.set}
+      aria-pressed={c.set !== undefined ? 'false' : undefined}
     >{c.label}</button>
   ))}
 </div>
 <style>
   .chips { display: flex; flex-wrap: wrap; gap: var(--space-2); }
   .chip {
-    min-height: var(--touch-min); padding: 0 var(--space-4);
-    background: var(--color-surface); color: var(--color-text);
-    border: 1px solid var(--color-border-strong); border-radius: var(--radius-full);
-    font-weight: 600; font-size: var(--text-small); cursor: pointer;
-    transition: background-color var(--duration-fast), border-color var(--duration-fast);
+    position: relative; height: var(--btn-s); padding: 0 var(--space-4);
+    background: var(--color-bg-sub); color: var(--color-text-sub);
+    border: 0; border-radius: var(--radius-full);
+    font-weight: 600; font-size: var(--fs-body-2); line-height: 1; cursor: pointer;
+    transition: background-color var(--duration-fast) var(--ease), transform var(--duration-fast) var(--ease);
   }
-  .chip:hover { background: var(--color-primary-soft); border-color: var(--color-primary); color: var(--color-primary); }
+  /* 터치 영역 44px 이상 */
+  .chip::after { content: ''; position: absolute; inset: -4px -2px; }
+  .chip[aria-pressed='true'] { background: var(--color-primary-weak); color: var(--color-on-primary-weak); }
+  @media (hover: hover) {
+    .chip:hover { background: var(--color-primary-weak); color: var(--color-on-primary-weak); }
+  }
+  @media (prefers-reduced-motion: no-preference) {
+    .chip:active { transform: scale(var(--press-scale)); }
+  }
 </style>

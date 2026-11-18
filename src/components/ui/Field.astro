@@ -13,8 +13,8 @@ const { id, label, hint } = Astro.props;
   <p class="error" id={`${id}-error`} hidden></p>
 </div>
 <style>
-  .field { margin-bottom: var(--space-4); }
-  label { display: block; font-weight: 600; margin-bottom: var(--space-1); }
-  .hint { margin: var(--space-1) 0 0; font-size: var(--text-small); line-height: var(--text-small-lh); color: var(--color-text-muted); }
-  .error { margin: var(--space-1) 0 0; font-size: var(--text-small); color: var(--color-danger); font-weight: 600; }
+  .field { margin-bottom: var(--space-6); }
+  label { display: block; font-size: var(--fs-body-2); line-height: var(--lh-body-2); font-weight: 600; color: var(--color-text-sub); margin-bottom: var(--space-2); }
+  .hint { margin: var(--space-2) 0 0; font-size: var(--fs-caption); line-height: var(--lh-caption); color: var(--color-text-tertiary); }
+  .error { margin: var(--space-2) 0 0; font-size: var(--fs-body-2); line-height: var(--lh-body-2); color: var(--color-danger); font-weight: 600; }
 </style>

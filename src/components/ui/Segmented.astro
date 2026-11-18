@@ -1,5 +1,5 @@
 ---
-/** 2~4개 선택지 세그먼트 (라디오 그룹). JS 없이도 동작한다. */
+/** 2~4개 선택지 세그먼트 (라디오 그룹). bg-sub 면 + 선택 시 primary-weak. JS 없이도 동작한다. */
 export interface SegOption { value: string; label: string }
 interface Props { name: string; legend: string; options: SegOption[]; value: string }
 const { name, legend, options, value } = Astro.props;
@@ -16,17 +16,16 @@ const { name, legend, options, value } = Astro.props;
   </div>
 </fieldset>
 <style>
-  .segmented { border: 0; padding: 0; margin: 0 0 var(--space-4); min-width: 0; }
-  legend { font-weight: 600; margin-bottom: var(--space-1); padding: 0; }
-  .row { display: inline-flex; border: 1px solid var(--color-border-strong); border-radius: var(--radius-sm); overflow: hidden; background: var(--color-surface); }
+  .segmented { border: 0; padding: 0; margin: 0 0 var(--space-6); min-width: 0; }
+  legend { font-size: var(--fs-body-2); font-weight: 600; color: var(--color-text-sub); margin-bottom: var(--space-2); padding: 0; }
+  .row { display: inline-flex; gap: var(--space-1); padding: var(--space-1); background: var(--color-bg-sub); border-radius: var(--radius-full); }
   label { position: relative; display: block; }
   input { position: absolute; inset: 0; opacity: 0; margin: 0; cursor: pointer; }
   span {
-    display: inline-flex; align-items: center; justify-content: center; min-height: var(--touch-min); padding: 0 var(--space-4);
-    font-weight: 600; color: var(--color-text); border-left: 1px solid var(--color-border);
+    display: inline-flex; align-items: center; justify-content: center; height: var(--btn-m); padding: 0 var(--space-5);
+    font-weight: 600; font-size: var(--fs-body-2); color: var(--color-text-sub); border-radius: var(--radius-full);
+    transition: background-color var(--duration-fast) var(--ease);
   }
-  label:first-child span { border-left: 0; }
-  input:checked + span { background: var(--color-primary); color: var(--color-on-primary); }
-  input:focus-visible + span { outline: 3px solid var(--color-primary); outline-offset: -3px; }
-  input:checked:focus-visible + span { outline-color: var(--color-on-primary); }
+  input:checked + span { background: var(--color-primary-weak); color: var(--color-on-primary-weak); }
+  input:focus-visible + span { outline: 2px solid var(--color-primary); outline-offset: 2px; }
 </style>
