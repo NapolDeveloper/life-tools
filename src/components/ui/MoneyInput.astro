@@ -5,8 +5,9 @@ import { num, koreanAmount } from '../../lib/format';
  * 금액 입력. type="text" + inputmode="numeric", 천 단위 콤마(JS), 단위 고정 표시, 아래에 한글 읽기.
  * 테두리 없는 bg-sub 면, 포커스 시 2px primary 링. slot에는 빠른 입력 칩(Chips)을 넣는다.
  */
-interface Props { id: string; name?: string; label: string; value: number; unit?: string; hint?: string }
-const { id, name = id, label, value, unit = '원', hint } = Astro.props;
+/** value가 null이면 빈 칸으로 두고(예: 비우면 추정), placeholder를 보여 준다. */
+interface Props { id: string; name?: string; label: string; value: number | null; unit?: string; hint?: string; placeholder?: string }
+const { id, name = id, label, value, unit = '원', hint, placeholder } = Astro.props;
 ---
 <Field id={id} label={label} hint={hint}>
   <div class="control">
@@ -16,13 +17,14 @@ const { id, name = id, label, value, unit = '원', hint } = Astro.props;
       type="text"
       inputmode="numeric"
       autocomplete="off"
-      value={num(value)}
+      value={value === null ? '' : num(value)}
+      placeholder={placeholder}
       data-money
       aria-describedby={`${id}-reading ${hint ? `${id}-hint ` : ''}${id}-error`}
     />
     <span class="unit" aria-hidden="true">{unit}</span>
   </div>
-  <p class="reading num" id={`${id}-reading`}>{koreanAmount(value)}</p>
+  <p class="reading num" id={`${id}-reading`}>{value === null ? '' : koreanAmount(value)}</p>
   <slot />
 </Field>
 <style>
@@ -35,5 +37,6 @@ const { id, name = id, label, value, unit = '원', hint } = Astro.props;
     font-size: var(--fs-body-1); font-weight: 600; font-variant-numeric: tabular-nums; text-align: right;
   }
   .unit { position: absolute; right: var(--space-4); top: 50%; transform: translateY(-50%); color: var(--color-text-sub); font-size: var(--fs-body-1); pointer-events: none; }
+  input::placeholder { color: var(--color-text-tertiary); font-weight: 400; }
   .reading { margin: var(--space-2) 0 var(--space-2); font-size: var(--fs-body-2); line-height: var(--lh-body-2); color: var(--color-primary); font-weight: 600; text-align: right; min-height: var(--lh-body-2); }
 </style>

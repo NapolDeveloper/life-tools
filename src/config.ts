@@ -48,7 +48,7 @@ export const CATEGORIES: Category[] = [
     title: '세금 계산기 모음',
     description:
       '연말정산, 종합소득세, 퇴직소득세처럼 해마다 헷갈리는 세금 계산을 쉬운 말로 풀어 드려요. 준비되는 대로 계산기를 하나씩 더할게요.',
-    planned: ['연말정산 계산기', '종합소득세 계산기', '퇴직소득세 계산기'],
+    planned: ['종합소득세 계산기', '퇴직소득세 계산기'],
   },
   {
     slug: 'work',
@@ -79,6 +79,14 @@ export const TOOLS: Tool[] = [
     name: '연봉 실수령액 계산기',
     category: 'pay',
     description: '연봉을 넣으면 4대보험과 소득세를 뺀 월 실수령액을 알려드려요.',
+    published: '2026-11-18',
+    updated: '2026-11-18',
+  },
+  {
+    slug: 'year-end-tax',
+    name: '연말정산 계산기',
+    category: 'tax',
+    description: '연봉과 카드 사용액, 가족, 공제 항목을 넣으면 2026년 귀속 예상 환급액이나 추가 납부액을 알려드려요.',
     published: '2026-11-18',
     updated: '2026-11-18',
   },

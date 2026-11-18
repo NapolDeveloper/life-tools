@@ -1,6 +1,6 @@
 ---
 /** 내역 표: 항목 / 금액 / 비율. 합계 행은 tfoot에서 강조한다. data-key로 스크립트가 값을 갱신한다. */
-export interface ResultRow { key: string; label: string; amount: string; ratio: string }
+export interface ResultRow { key: string; label: string; amount: string; ratio: string; hidden?: boolean }
 interface Props { caption: string; captionOut?: string; rows: ResultRow[]; totals?: ResultRow[] }
 const { caption, captionOut, rows, totals = [] } = Astro.props;
 ---
@@ -12,7 +12,7 @@ const { caption, captionOut, rows, totals = [] } = Astro.props;
     </thead>
     <tbody>
       {rows.map((r) => (
-        <tr data-row={r.key}>
+        <tr data-row={r.key} hidden={r.hidden}>
           <th scope="row">{r.label}</th>
           <td class="r num" data-amount>{r.amount}</td>
           <td class="r num muted" data-ratio>{r.ratio}</td>
@@ -22,7 +22,7 @@ const { caption, captionOut, rows, totals = [] } = Astro.props;
     {totals.length > 0 && (
       <tfoot>
         {totals.map((r) => (
-          <tr data-row={r.key}>
+          <tr data-row={r.key} hidden={r.hidden}>
             <th scope="row">{r.label}</th>
             <td class="r num" data-amount>{r.amount}</td>
             <td class="r num" data-ratio>{r.ratio}</td>
