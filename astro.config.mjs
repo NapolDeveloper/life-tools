@@ -10,7 +10,7 @@ export default defineConfig({
   site: SITE_URL,
   output: 'static',
   trailingSlash: 'always',
-  build: { format: 'directory' },
+  build: { format: 'directory', assets: 'assets' }, // '_'로 시작하는 폴더명을 거부하는 호스팅(미리보기)이 있어 assets 사용
   integrations: [
     sitemap({
       filter: (url) => Boolean(pageOf(url)),

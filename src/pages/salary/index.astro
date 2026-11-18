@@ -1,249 +1,282 @@
 ---
 import BaseLayout from '../../layouts/BaseLayout.astro';
+import PageHeader from '../../components/ui/PageHeader.astro';
+import Section from '../../components/ui/Section.astro';
+import MoneyInput from '../../components/ui/MoneyInput.astro';
+import Chips from '../../components/ui/Chips.astro';
+import Stepper from '../../components/ui/Stepper.astro';
+import Details from '../../components/ui/Details.astro';
+import Button from '../../components/ui/Button.astro';
+import ResultHero from '../../components/ui/ResultHero.astro';
+import ResultTable from '../../components/ui/ResultTable.astro';
+import StickyResultBar from '../../components/ui/StickyResultBar.astro';
+import CopyButton from '../../components/ui/CopyButton.astro';
+import ShareButton from '../../components/ui/ShareButton.astro';
+import Toast from '../../components/ui/Toast.astro';
 import AdSlot from '../../components/ui/AdSlot.astro';
-import { SITE_NAME, SITE_URL } from '../../config';
+import Steps from '../../components/ui/Steps.astro';
+import DataTable from '../../components/ui/DataTable.astro';
+import SourceList from '../../components/ui/SourceList.astro';
+import Notice from '../../components/ui/Notice.astro';
+import FaqList from '../../components/ui/FaqList.astro';
+import RelatedTools from '../../components/ui/RelatedTools.astro';
+import ChangeLog from '../../components/ui/ChangeLog.astro';
+import RotateCcw from '../../components/icons/RotateCcw.astro';
+import { SITE_NAME, SITE_URL, TOOLS } from '../../config';
 import { calculateSalary } from '../../lib/salary';
-import { PAYROLL_BASE_YEAR, PENSION, HEALTH, LONG_TERM_CARE, EMPLOYMENT } from '../../data/payroll';
+import { SALARY_DEFAULTS } from '../../lib/salary-query';
+import { viewOf, DEDUCTION_ROWS, TOTAL_ROWS } from '../../lib/salary-view';
+import { won, koreanAmount } from '../../lib/format';
+import { PAYROLL_BASE_YEAR, PAYROLL_AS_OF, PAYROLL_SOURCES, PENSION, HEALTH, LONG_TERM_CARE, EMPLOYMENT } from '../../data/payroll';
 
-const won = (n: number) => n.toLocaleString('ko-KR');
+const tool = TOOLS.find((t) => t.slug === 'salary')!;
 const pct = (n: number) => `${+(n * 100).toFixed(3)}%`;
 
-const defaults = { annualSalary: 40_000_000, monthlyNonTaxable: 200_000, dependents: 1, children: 0 };
-const initial = calculateSalary(defaults);
+const d = SALARY_DEFAULTS;
+const initial = calculateSalary(d);
+const view = viewOf(initial);
 
-const rows = [
-  { key: 'pension', label: '국민연금' },
-  { key: 'health', label: '건강보험' },
-  { key: 'longTermCare', label: '장기요양보험' },
-  { key: 'employment', label: '고용보험' },
-  { key: 'incomeTax', label: '소득세' },
-  { key: 'localTax', label: '지방소득세' },
-] as const;
+const title = `연봉 실수령액 계산기 (${PAYROLL_BASE_YEAR}년 기준)`;
+const description = `연봉과 가족 수를 넣으면 국민연금·건강보험·고용보험·소득세를 뺀 월 실수령액을 바로 알려드려요. ${PAYROLL_BASE_YEAR}년 요율과 계산 근거를 공개해요.`;
 
-const examples = [30_000_000, 40_000_000, 50_000_000].map((annualSalary) => ({
-  annualSalary,
-  r: calculateSalary({ ...defaults, annualSalary }),
-}));
+const rowOf = (key: (typeof DEDUCTION_ROWS)[number]['key'] | (typeof TOTAL_ROWS)[number]['key'], label: string) => ({
+  key, label, ...view.rows[key],
+});
 
-const title = '연봉 실수령액 계산기';
-const description = `연봉과 비과세액, 부양가족 수를 입력하면 국민연금·건강보험·장기요양·고용보험·소득세를 뺀 월 예상 실수령액을 계산합니다. ${PAYROLL_BASE_YEAR}년 요율 기준 참고용 계산기.`;
+const rateRows = [
+  { item: '국민연금', formula: `과세 월급 × ${pct(PENSION.employeeRate)}`, note: `기준소득월액 ${won(PENSION.baseMin)}~${won(PENSION.baseMax)} 범위로 맞춰 계산해요` },
+  { item: '건강보험', formula: `과세 월급 × ${pct(HEALTH.employeeRate)}`, note: '직장가입자 근로자 부담분(보험료율의 절반)이에요' },
+  { item: '장기요양보험', formula: `건강보험료 × ${pct(LONG_TERM_CARE.rateOnHealthPremium)}`, note: '소득이 아니라 건강보험료에 곱해요' },
+  { item: '고용보험', formula: `과세 월급 × ${pct(EMPLOYMENT.employeeRate)}`, note: '실업급여분 근로자 부담분이에요' },
+  { item: '소득세', formula: '아래 순서대로 연 단위 계산 후 12로 나눔', note: '간이세액표를 근사한 값이에요' },
+  { item: '지방소득세', formula: '소득세 × 10%', note: '' },
+];
+
+const exampleRows = [30_000_000, 40_000_000, 50_000_000, 60_000_000].map((annualSalary) => {
+  const r = calculateSalary({ ...d, annualSalary });
+  return {
+    salary: koreanAmount(annualSalary),
+    gross: won(r.monthlyGross),
+    deduction: won(r.monthlyDeductionTotal),
+    net: won(r.monthlyNet),
+  };
+});
+
+const familyCases = [
+  { label: '혼자 (본인 1명)', input: { ...d, annualSalary: 50_000_000 } },
+  { label: '배우자 + 자녀 1명 (3명, 자녀 1명)', input: { ...d, annualSalary: 50_000_000, dependents: 3, children: 1 } },
+  { label: '배우자 + 자녀 2명 (4명, 자녀 2명)', input: { ...d, annualSalary: 50_000_000, dependents: 4, children: 2 } },
+];
+const familyRows = familyCases.map((c) => {
+  const r = calculateSalary(c.input);
+  return { label: c.label, tax: won(r.incomeTax + r.localTax), net: won(r.monthlyNet) };
+});
 
 const faqs = [
   {
-    q: '계산 결과가 실제 급여명세서와 다른 이유는 뭔가요?',
-    a: '소득세는 국세청 간이세액표를 그대로 쓰지 않고 소득세법의 공제·세율 구조로 근사해서 계산하기 때문에 몇 천 원에서 몇 만 원 차이가 날 수 있어요. 또 회사마다 상여금, 각종 수당, 보험료 정산 시점이 달라 명세서와 다를 수 있습니다.',
+    q: '계산 결과가 실제 급여명세서와 다른 이유가 뭔가요?',
+    a: '소득세는 국세청 간이세액표를 그대로 옮기지 않고 소득세법의 공제·세율 구조로 계산한 근사값이라서 몇 천 원에서 몇 만 원 차이가 날 수 있어요. 회사마다 상여금, 각종 수당, 보험료 정산 시점이 다른 것도 이유예요. 급여명세서의 4대보험 금액이 크게 다르다면 보수월액 기준이 다를 수 있으니 회사 급여 담당자에게 확인해 보세요.',
   },
   {
     q: '비과세액에는 무엇을 넣어야 하나요?',
-    a: '월급에 포함된 식대(월 20만원까지), 차량유지비 등 세금이 붙지 않는 항목의 합계를 넣으면 됩니다. 비과세액은 4대보험과 소득세를 계산하는 기준 금액에서 빠지므로 많을수록 공제액이 줄어요. 정확한 금액은 근로계약서나 급여명세서에서 확인하세요.',
+    a: '월급에 포함된 식대(월 20만 원까지), 차량유지비 같은 세금이 붙지 않는 항목의 합계를 넣어요. 비과세액은 4대보험과 소득세를 계산하는 기준에서 빠지기 때문에 많을수록 공제가 줄어요. 식대를 따로 받지 않는다면 0으로 바꿔 주세요. 정확한 금액은 근로계약서나 급여명세서에서 확인할 수 있어요.',
   },
   {
     q: '부양가족 수에 본인도 포함하나요?',
-    a: '네, 본인을 포함한 숫자를 넣어 주세요. 혼자라면 1, 배우자와 자녀 한 명을 부양한다면 3입니다. 자녀 수는 부양가족에 포함된 20세 이하 자녀만 따로 적습니다.',
+    a: '네, 본인을 포함한 숫자를 넣어요. 혼자라면 1명, 배우자와 자녀 한 명을 부양한다면 3명이에요. 자녀 수는 부양가족에 포함된 8세 이상 20세 이하 자녀만 따로 넣으면 돼요. 자녀 수는 부양가족 수보다 1 작은 값까지만 고를 수 있어요.',
   },
   {
-    q: '연봉에 퇴직금이 포함되어 있나요?',
-    a: '이 계산기는 입력한 연봉을 12개월로 균등하게 나눠 받는다고 가정합니다. 퇴직금이 연봉에 포함된 포괄임금 계약이라면 퇴직금 몫을 뺀 금액을 입력해야 실수령액에 가깝게 나와요. 성과급을 따로 받는 경우도 그 금액은 빼고 입력하세요.',
+    q: '연봉에 퇴직금이나 성과급이 포함되어 있으면 어떻게 하나요?',
+    a: '이 계산기는 입력한 연봉을 12개월로 똑같이 나눠 받는다고 가정해요. 퇴직금이 연봉에 포함된 계약이라면 퇴직금 몫을 뺀 금액을, 성과급을 따로 받는다면 그 금액을 뺀 연봉을 넣어야 매달 받는 돈에 가까워요.',
   },
   {
     q: '4대보험 요율은 매년 바뀌나요?',
-    a: `건강보험과 장기요양보험 요율은 보통 매년, 국민연금 기준소득월액 상·하한은 매년 7월에 조정됩니다. 이 페이지는 ${PAYROLL_BASE_YEAR}년 기준 값을 사용하고 있으며, 새 요율이 확인되면 갱신합니다.`,
+    a: `네, 건강보험과 장기요양보험 요율은 보통 매년 바뀌고, 국민연금은 보험료율이 해마다 올라가는 중이며 기준소득월액 상·하한은 매년 7월에 조정돼요. 이 페이지는 ${PAYROLL_BASE_YEAR}년 기준 값을 쓰고, 새 요율이 확인되면 갱신하며 아래 변경 이력에 남겨요.`,
+  },
+  {
+    q: '공유 링크에는 어떤 정보가 담기나요?',
+    a: '연봉, 비과세액, 부양가족 수, 자녀 수 같은 숫자만 주소에 담겨요. 이름이나 연락처는 담기지 않고, 입력한 값은 돈셈 서버로 보내지지도 않아요. 링크를 열면 같은 값으로 계산된 결과를 볼 수 있어요.',
   },
 ];
 
+const changelog = [{ date: '2026-11-18', text: `최초 공개. ${PAYROLL_BASE_YEAR}년 4대보험 요율과 국민연금 기준소득월액을 반영했어요.` }];
+
+const pageUrl = new URL('/salary/', SITE_URL).href;
 const jsonLd = [
   {
     '@context': 'https://schema.org',
-    '@type': 'FAQPage',
-    mainEntity: faqs.map((f) => ({
-      '@type': 'Question',
-      name: f.q,
-      acceptedAnswer: { '@type': 'Answer', text: f.a },
-    })),
-  },
-  {
-    '@context': 'https://schema.org',
     '@type': 'WebApplication',
-    name: `${SITE_NAME} ${title}`,
+    name: `${SITE_NAME} 연봉 실수령액 계산기`,
     applicationCategory: 'FinanceApplication',
     operatingSystem: 'Any',
     inLanguage: 'ko',
-    url: new URL('/salary/', SITE_URL).href,
+    url: pageUrl,
+    description,
+    datePublished: tool.published,
+    dateModified: tool.updated,
     offers: { '@type': 'Offer', price: '0', priceCurrency: 'KRW' },
+  },
+  {
+    '@context': 'https://schema.org',
+    '@type': 'FAQPage',
+    mainEntity: faqs.map((f) => ({ '@type': 'Question', name: f.q, acceptedAnswer: { '@type': 'Answer', text: f.a } })),
   },
 ];
 ---
-<BaseLayout title={title} description={description} jsonLd={jsonLd} breadcrumbs={[{ name: '급여', href: '/pay/' }, { name: title }]}>
-  <h1>{title}</h1>
-  <p class="lead">세전 연봉에서 4대보험과 소득세를 빼고 나면 매달 얼마가 통장에 들어오는지 계산해 보세요.</p>
+<BaseLayout title={title} description={description} jsonLd={jsonLd} breadcrumbs={[{ name: '급여', href: '/pay/' }, { name: '연봉 실수령액 계산기' }]}>
+  <PageHeader title="연봉 실수령액 계산기" description="연봉을 넣으면 4대보험과 소득세를 뺀 월 실수령액을 알려드려요." updated={tool.updated} />
 
-  <section class="card" aria-labelledby="calc-title">
-    <h2 id="calc-title" style="margin-top:0">계산하기</h2>
-    <form id="salary-form" novalidate>
-      <div class="form-grid">
-        <div class="field">
-          <label for="annual">세전 연봉 (원)</label>
-          <input id="annual" name="annual" type="number" inputmode="numeric" min="0" step="1000000" value={defaults.annualSalary} />
-          <span class="hint" id="annual-hint">{won(defaults.annualSalary)}원</span>
-        </div>
-        <div class="field">
-          <label for="nontax">월 비과세액 (원)</label>
-          <input id="nontax" name="nontax" type="number" inputmode="numeric" min="0" step="10000" value={defaults.monthlyNonTaxable} />
-          <span class="hint">기본값 20만원은 식대 비과세 한도예요.</span>
-        </div>
-        <div class="field">
-          <label for="deps">부양가족 수 (본인 포함)</label>
-          <input id="deps" name="deps" type="number" inputmode="numeric" min="1" max="20" step="1" value={defaults.dependents} />
-        </div>
-        <div class="field">
-          <label for="kids">20세 이하 자녀 수</label>
-          <input id="kids" name="kids" type="number" inputmode="numeric" min="0" max="19" step="1" value={defaults.children} />
-          <span class="hint">부양가족 수에 포함된 인원만 입력하세요.</span>
-        </div>
+  <section class="calc" aria-labelledby="calc-title">
+    <h2 id="calc-title" class="sr-only">계산하기</h2>
+    <form id="calc-form" class="inputs" novalidate>
+      <MoneyInput id="annual" label="세전 연봉" value={d.annualSalary} hint="1년 동안 받는 세전 금액이에요. 상여금·성과급은 빼고 넣어요.">
+        <Chips target="annual" items={[{ label: '+100만', add: 1_000_000 }, { label: '+500만', add: 5_000_000 }, { label: '+1,000만', add: 10_000_000 }]} />
+      </MoneyInput>
+
+      <Stepper id="deps" label="부양가족 수 (본인 포함)" value={d.dependents} min={1} max={20} hint="혼자라면 1명이에요. 배우자·자녀 등 부양하는 가족을 더해요." />
+
+      <Details summary="상세 옵션 (비과세액·자녀 수)">
+        <MoneyInput id="nontax" label="월 비과세액" value={d.monthlyNonTaxable} hint="식대처럼 세금이 붙지 않는 돈이에요. 기본값은 식대 한도 20만 원이에요.">
+          <Chips target="nontax" label="비과세액 빠른 입력" items={[{ label: '없음', set: 0 }, { label: '식대 20만', set: 200_000 }, { label: '+10만', add: 100_000 }]} />
+        </MoneyInput>
+        <Stepper id="kids" label="8세 이상 20세 이하 자녀 수" value={d.children} min={0} max={Math.max(0, d.dependents - 1)} hint="부양가족 수에 포함된 자녀만 세어요." />
+      </Details>
+
+      <div class="actions">
+        <Button type="submit" variant="primary" class="sr-only-focusable">계산하기</Button>
+        <Button variant="ghost" size="sm" data-reset><RotateCcw />초기화</Button>
       </div>
-      <button class="btn" type="submit">계산하기</button>
     </form>
 
-    <div class="result-main" aria-live="polite">
-      <div class="label">월 예상 실수령액</div>
-      <div class="value" id="out-net">{won(initial.monthlyNet)}원</div>
-      <div class="label">세전 월급 <span id="out-gross">{won(initial.monthlyGross)}</span>원 기준</div>
+    <div class="result">
+      <ResultHero
+        label="월 예상 실수령액"
+        out="monthlyNet"
+        value={view.out.monthlyNet}
+        captionOut="heroCaption"
+        caption={view.out.heroCaption}
+        subs={[
+          { label: '연 실수령액', value: view.out.annualNet, out: 'annualNet' },
+          { label: '월 공제 합계', value: view.out.monthlyDeductionTotal, out: 'monthlyDeductionTotal' },
+        ]}
+      >
+        <p class="small muted disclaimer">참고용이에요. 실제 급여와 다를 수 있어요.</p>
+        <p class="small muted" data-result-note hidden>비과세액이 월급보다 커서 월급 전체를 비과세로 계산했어요.</p>
+      </ResultHero>
     </div>
-
-    <div class="table-scroll" style="margin-top:16px">
-      <table>
-        <caption class="lead" style="text-align:left;caption-side:top">항목별 공제액</caption>
-        <thead><tr><th scope="col">항목</th><th scope="col">월</th><th scope="col">연간</th></tr></thead>
-        <tbody>
-          {rows.map((row) => (
-            <tr>
-              <th scope="row" style="font-weight:400">{row.label}</th>
-              <td data-month={row.key}>{won(initial[row.key])}원</td>
-              <td data-year={row.key}>{won(initial[row.key] * 12)}원</td>
-            </tr>
-          ))}
-        </tbody>
-        <tfoot>
-          <tr class="total"><th scope="row">공제 합계</th><td data-month="monthlyDeductionTotal">{won(initial.monthlyDeductionTotal)}원</td><td data-year="annualDeductionTotal">{won(initial.annualDeductionTotal)}원</td></tr>
-          <tr class="total"><th scope="row">실수령액</th><td data-month="monthlyNet">{won(initial.monthlyNet)}원</td><td data-year="annualNet">{won(initial.annualNet)}원</td></tr>
-        </tfoot>
-      </table>
-    </div>
-    <p class="notice" style="margin-top:16px">
-      참고용 계산입니다. 소득세는 국세청 간이세액표를 근사한 값이라 실제 급여명세서와 다를 수 있어요.
-    </p>
   </section>
 
-  <AdSlot />
+  <Section id="detail" title={`결과 상세 (${PAYROLL_BASE_YEAR}년 기준)`} wide>
+    <ResultTable
+      caption={view.out.tableCaption}
+      captionOut="tableCaption"
+      rows={DEDUCTION_ROWS.map((r) => rowOf(r.key, r.label))}
+      totals={TOTAL_ROWS.map((r) => rowOf(r.key, r.label))}
+    />
+    <div class="share">
+      <CopyButton />
+      <ShareButton />
+    </div>
+    <p class="small muted">참고용 계산이에요. 소득세는 간이세액표를 근사한 값이라 실제 급여명세서와 다를 수 있어요.</p>
+  </Section>
 
-  <h2>사용법</h2>
-  <ol>
-    <li>세전 연봉을 원 단위로 입력합니다. 예: 4천만원이면 40000000</li>
-    <li>월급에 포함된 비과세액을 입력합니다. 식대를 받는다면 기본값 200000을 그대로 두면 돼요.</li>
-    <li>본인을 포함한 부양가족 수와, 그중 20세 이하 자녀 수를 입력합니다.</li>
-    <li>숫자를 바꾸면 결과가 바로 갱신됩니다. 항목별 공제액과 연간 합계도 함께 확인하세요.</li>
-  </ol>
+  <AdSlot slot="after-result" />
 
-  <h2>계산 방식</h2>
-  <p>
-    먼저 연봉을 12로 나눠 세전 월급을 구하고, 여기서 비과세액을 뺀 금액(과세 대상 월급)을 보험료와 세금의 기준으로 삼습니다.
-    각 보험료는 10원 미만을 버리고 계산해요.
-  </p>
-  <div class="table-scroll">
-    <table>
-      <thead><tr><th scope="col">항목</th><th scope="col">근로자 부담 계산</th></tr></thead>
-      <tbody>
-        <tr><th scope="row" style="font-weight:400">국민연금</th><td>과세 월급 x {pct(PENSION.employeeRate)} (기준소득월액 {won(PENSION.baseMin)}원~{won(PENSION.baseMax)}원)</td></tr>
-        <tr><th scope="row" style="font-weight:400">건강보험</th><td>과세 월급 x {pct(HEALTH.employeeRate)}</td></tr>
-        <tr><th scope="row" style="font-weight:400">장기요양보험</th><td>건강보험료 x {pct(LONG_TERM_CARE.rateOnHealthPremium)}</td></tr>
-        <tr><th scope="row" style="font-weight:400">고용보험</th><td>과세 월급 x {pct(EMPLOYMENT.employeeRate)}</td></tr>
-        <tr><th scope="row" style="font-weight:400">소득세</th><td>아래 설명 참고 (근사)</td></tr>
-        <tr><th scope="row" style="font-weight:400">지방소득세</th><td>소득세 x 10%</td></tr>
-      </tbody>
-    </table>
-  </div>
-  <h3>소득세 근사 방식</h3>
-  <p>
-    국세청 근로소득 간이세액표는 월급 구간마다 정해진 값을 보여 주는 표예요. 이 계산기는 표를 그대로 옮기는 대신, 표가 바탕으로 삼는
-    소득세법의 구조를 따라 연 단위로 계산한 뒤 12로 나눕니다. 순서는 이래요.
-  </p>
-  <ol>
-    <li>총급여(비과세 제외 연봉)에서 근로소득공제를 뺍니다.</li>
-    <li>부양가족 1인당 150만원 기본공제와 낸 4대보험료를 더 뺍니다. 남은 금액이 과세표준이에요.</li>
-    <li>과세표준에 누진 세율(6%~45%)을 적용해 산출세액을 구합니다.</li>
-    <li>근로소득세액공제, 자녀세액공제, 표준세액공제를 뺀 값을 12개월로 나눕니다.</li>
-  </ol>
-  <p>
-    그래서 실제 간이세액표 값이나 연말정산 결과와 차이가 있을 수 있습니다. 월 중 간이세액 조견표의 80%·120% 선택, 중도 입사, 상여금, 의료비·교육비 같은 개인별 공제는 반영하지 않았어요.
-    기준 연도는 {PAYROLL_BASE_YEAR}년이며, 자세한 요율은 국민연금공단, 국민건강보험공단, 국세청 안내를 따랐습니다.
-  </p>
+  <Section id="usage" title="사용법">
+    <Steps items={[
+      { title: '세전 연봉을 넣어요', body: '계약서나 연봉 협상에서 들은 1년치 세전 금액을 넣어요. 입력하면 천 단위 콤마가 붙고, 아래에 한글로 읽은 금액이 보여요. 아래 칩을 누르면 금액을 빠르게 더할 수 있어요.' },
+      { title: '부양가족 수를 골라요', body: '본인을 포함한 숫자예요. 혼자라면 1명, 배우자와 자녀 한 명을 부양하면 3명이에요. 부양가족이 많을수록 소득세가 줄어요.' },
+      { title: '필요하면 상세 옵션을 열어요', body: '월 비과세액(기본 20만 원, 식대)과 8세 이상 20세 이하 자녀 수를 바꿀 수 있어요. 식대를 따로 받지 않는다면 비과세액을 0으로 바꿔요.' },
+      { title: '결과를 확인하고 나눠요', body: '숫자를 바꾸면 결과가 바로 바뀌어요. 항목별 공제 내역을 확인한 뒤 복사하기로 문구를 복사하거나, 링크 공유로 같은 결과를 다른 사람에게 보낼 수 있어요.' },
+    ]} />
+  </Section>
 
-  <h2>예시: 연봉별 월 실수령액</h2>
-  <p>비과세 월 20만원, 부양가족 본인 1명, 자녀 없음 기준입니다.</p>
-  <div class="table-scroll">
-    <table>
-      <thead>
-        <tr><th scope="col">연봉</th><th scope="col">세전 월급</th><th scope="col">월 공제 합계</th><th scope="col">월 실수령액</th></tr>
-      </thead>
-      <tbody>
-        {examples.map(({ annualSalary, r }) => (
-          <tr>
-            <th scope="row" style="font-weight:400">{won(annualSalary / 10000)}만원</th>
-            <td>{won(r.monthlyGross)}원</td>
-            <td>{won(r.monthlyDeductionTotal)}원</td>
-            <td><strong>{won(r.monthlyNet)}원</strong></td>
-          </tr>
-        ))}
-      </tbody>
-    </table>
-  </div>
+  <Section id="method" title="계산 방식과 근거">
+    <p>
+      먼저 연봉을 12로 나눠 세전 월급을 구하고, 여기서 비과세액을 뺀 금액(과세 월급)을 보험료와 세금의 기준으로 삼아요. 비과세액은 세금이 붙지 않는 돈이라 보험료와 세금을 계산할 때 빠져요. 각 보험료와 세금은 10원 미만을 버려요.
+    </p>
+    <DataTable
+      caption={`${PAYROLL_BASE_YEAR}년 근로자 부담 요율`}
+      columns={[{ key: 'item', label: '항목' }, { key: 'formula', label: '계산' }, { key: 'note', label: '참고' }]}
+      rows={rateRows}
+    />
+    <h3>소득세 계산 순서</h3>
+    <p>
+      국세청 근로소득 간이세액표는 월급 구간마다 정해진 금액을 보여 주는 표예요. 돈셈은 표를 그대로 옮기는 대신, 표가 바탕으로 삼는 소득세법의 구조를 따라 1년치로 계산한 뒤 12로 나눠요.
+    </p>
+    <ol>
+      <li>총급여(비과세를 뺀 연봉)에서 근로소득공제를 빼요.</li>
+      <li>부양가족 1명당 150만 원 인적공제와 1년 동안 내는 4대보험료를 더 빼요. 남은 금액이 과세표준이에요.</li>
+      <li>과세표준에 누진 세율(6%~45%)을 적용해 산출세액을 구해요.</li>
+      <li>근로소득세액공제, 자녀세액공제, 표준세액공제를 빼고 12개월로 나눠요. 지방소득세는 여기에 10%를 더해요.</li>
+    </ol>
+    <h3>공식 계산기와 차이가 날 수 있는 이유</h3>
+    <p>
+      간이세액표 조견값, 월 중 입사·퇴사, 상여금, 의료비·교육비 같은 개인별 공제는 반영하지 않았어요. 그래서 국세청 간이세액표나 연말정산 결과와 차이가 날 수 있어요. 돈셈은 공식 계산기에 같은 값을 넣어 비교한 결과를 따로 기록해 두고 있어요.
+    </p>
+    <h3>출처</h3>
+    <SourceList sources={[...PAYROLL_SOURCES]} asOf={PAYROLL_AS_OF} />
+    <p class="small muted">기준 연도는 {PAYROLL_BASE_YEAR}년이에요. 국민연금 기준소득월액은 매년 7월에 바뀌어서 {PAYROLL_BASE_YEAR}년 7월부터 {PAYROLL_BASE_YEAR + 1}년 6월 적용값을 썼어요.</p>
+  </Section>
 
-  <h2>자주 묻는 질문</h2>
-  <div>
-    {faqs.map((f) => (
-      <details>
-        <summary>{f.q}</summary>
-        <p>{f.a}</p>
-      </details>
-    ))}
-  </div>
+  <Section id="examples" title="예시">
+    <p>비과세 월 20만 원, 본인만 부양하는 경우에 연봉별로 얼마가 들어오는지 보여 드려요.</p>
+    <DataTable
+      caption="연봉별 월 실수령액"
+      columns={[
+        { key: 'salary', label: '연봉' },
+        { key: 'gross', label: '세전 월급', align: 'right' },
+        { key: 'deduction', label: '월 공제 합계', align: 'right' },
+        { key: 'net', label: '월 실수령액', align: 'right' },
+      ]}
+      rows={exampleRows}
+    />
+    <p>같은 연봉 5,000만 원이라도 부양가족이 있으면 소득세가 줄어서 실수령액이 달라져요.</p>
+    <DataTable
+      caption="연봉 5,000만 원, 가족 구성별 비교"
+      columns={[
+        { key: 'label', label: '가족 구성' },
+        { key: 'tax', label: '월 소득세 + 지방소득세', align: 'right' },
+        { key: 'net', label: '월 실수령액', align: 'right' },
+      ]}
+      rows={familyRows}
+    />
+  </Section>
 
-  <h2>이용 안내</h2>
-  <p class="notice">
-    이 계산기의 결과는 참고용이며 실제 급여, 세액, 보험료와 다를 수 있습니다. 급여 협상이나 신고처럼 중요한 결정에는 회사 급여 담당자나 국세청 등 공식 기관의 확인을 거쳐 주세요.
-  </p>
+  <AdSlot slot="mid-content" />
+
+  <Section id="faq" title="자주 묻는 질문">
+    <FaqList items={faqs} />
+  </Section>
+
+  <Section id="related" title="관련 계산기">
+    <RelatedTools category="pay" current="salary" />
+  </Section>
+
+  <Section id="notice" title="안내와 변경 이력">
+    <Notice variant="warning" title="참고용 안내">
+      <p>이 계산기의 결과는 일반적인 기준으로 계산한 참고용 추정치이고 실제 급여, 세액, 보험료와 다를 수 있어요. 세무·법률 자문이 아니에요.</p>
+      <p>급여 협상이나 신고처럼 중요한 결정 전에는 회사 급여 담당자나 국세청, 국민연금공단, 국민건강보험공단 같은 공식 기관에서 확인해 주세요.</p>
+    </Notice>
+    <p class="small muted">최종 갱신일 <time datetime={tool.updated}>{tool.updated}</time> · 오류를 발견했다면 <a href="/contact/">문의 페이지</a>로 알려 주세요. 48시간 안에 확인하고 수정하면 아래에 기록해요.</p>
+    <ChangeLog items={changelog} />
+  </Section>
+
+  <StickyResultBar label="월 실수령액" out="monthlyNet" value={view.out.monthlyNet} />
+  <Toast />
 </BaseLayout>
-
-<script>
-  import { calculateSalary } from '../../lib/salary';
-
-  const $ = <T extends HTMLElement>(id: string) => document.getElementById(id) as T;
-  const won = (n: number) => `${n.toLocaleString('ko-KR')}원`;
-  const val = (id: string) => Number($<HTMLInputElement>(id).value);
-
-  function render() {
-    const r = calculateSalary({
-      annualSalary: val('annual'),
-      monthlyNonTaxable: val('nontax'),
-      dependents: val('deps'),
-      children: val('kids'),
-    });
-    $('out-net').textContent = won(r.monthlyNet);
-    $('out-gross').textContent = r.monthlyGross.toLocaleString('ko-KR');
-    $('annual-hint').textContent = won(Math.max(0, Math.floor(val('annual') || 0)));
-    document.querySelectorAll<HTMLElement>('[data-month]').forEach((el) => {
-      el.textContent = won(r[el.dataset.month as keyof typeof r]);
-    });
-    document.querySelectorAll<HTMLElement>('[data-year]').forEach((el) => {
-      const k = el.dataset.year as keyof typeof r;
-      el.textContent = won(k === 'annualDeductionTotal' || k === 'annualNet' ? r[k] : r[k] * 12);
-    });
+<style>
+  .calc { display: grid; gap: var(--space-5); }
+  .inputs { background: var(--color-surface); border: 1px solid var(--color-border); border-radius: var(--radius-lg); padding: var(--space-4); }
+  .actions { display: flex; align-items: center; justify-content: space-between; gap: var(--space-3); }
+  .disclaimer { margin: var(--space-3) 0 0; }
+  .share { display: flex; flex-wrap: wrap; gap: var(--space-2); margin: var(--space-4) 0 var(--space-3); }
+  @media (min-width: 768px) {
+    .calc { grid-template-columns: 1fr 1fr; align-items: start; }
+    .result { position: sticky; top: var(--space-4); }
+    .inputs { padding: var(--space-5); }
   }
-
-  const form = document.getElementById('salary-form') as HTMLFormElement;
-  form.addEventListener('input', render);
-  form.addEventListener('submit', (e) => {
-    e.preventDefault();
-    render();
-  });
+</style>
+<script>
+  import '../../scripts/salary-tool';
 </script>
