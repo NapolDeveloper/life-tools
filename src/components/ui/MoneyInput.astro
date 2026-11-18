@@ -1,0 +1,40 @@
+---
+import Field from './Field.astro';
+import { num, koreanAmount } from '../../lib/format';
+/**
+ * 금액 입력. type="text" + inputmode="numeric", 천 단위 콤마(JS), 단위 고정 표시, 아래에 한글 읽기.
+ * slot에는 빠른 입력 칩(Chips)을 넣는다.
+ */
+interface Props { id: string; name?: string; label: string; value: number; unit?: string; hint?: string }
+const { id, name = id, label, value, unit = '원', hint } = Astro.props;
+---
+<Field id={id} label={label} hint={hint}>
+  <div class="control">
+    <input
+      id={id}
+      name={name}
+      type="text"
+      inputmode="numeric"
+      autocomplete="off"
+      value={num(value)}
+      data-money
+      aria-describedby={`${id}-reading ${hint ? `${id}-hint ` : ''}${id}-error`}
+    />
+    <span class="unit" aria-hidden="true">{unit}</span>
+  </div>
+  <p class="reading num" id={`${id}-reading`}>{koreanAmount(value)}</p>
+  <slot />
+</Field>
+<style>
+  .control { position: relative; }
+  input {
+    width: 100%; min-height: var(--touch-min); padding: 0 calc(var(--space-6) + var(--space-2)) 0 var(--space-3);
+    background: var(--color-surface); color: var(--color-text);
+    border: 1px solid var(--color-border-strong); border-radius: var(--radius-sm);
+    font-size: max(1rem, var(--text-body)); font-variant-numeric: tabular-nums; text-align: right;
+  }
+  input:hover { border-color: var(--color-primary); }
+  input[aria-invalid='true'] { border-color: var(--color-danger); border-width: 2px; }
+  .unit { position: absolute; right: var(--space-3); top: 50%; transform: translateY(-50%); color: var(--color-text-muted); pointer-events: none; }
+  .reading { margin: var(--space-1) 0 var(--space-2); font-size: var(--text-small); color: var(--color-primary); font-weight: 600; text-align: right; min-height: 1.6em; }
+</style>

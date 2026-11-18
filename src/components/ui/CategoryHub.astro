@@ -1,0 +1,33 @@
+---
+import ToolCard from './ToolCard.astro';
+import { toolsOf, getCategory, type CategorySlug } from '../../config';
+/** 카테고리 허브: 소개(slot) + 도구 카드 + 준비 중인 계산기(텍스트만, 링크 없음). */
+interface Props { category: CategorySlug }
+const { category } = Astro.props;
+const cat = getCategory(category);
+const tools = toolsOf(category);
+---
+<div class="hub">
+  <div class="intro prose"><slot /></div>
+  <section aria-labelledby="hub-tools" class="block">
+    <h2 id="hub-tools">{cat.name} 계산기</h2>
+    {tools.length > 0 ? (
+      <div class="grid">{tools.map((t) => <ToolCard tool={t} />)}</div>
+    ) : (
+      <p class="muted prose">아직 공개한 계산기가 없어요. 아래 계산기를 준비하고 있어요.</p>
+    )}
+  </section>
+  {cat.planned.length > 0 && (
+    <section aria-labelledby="hub-planned" class="block prose">
+      <h2 id="hub-planned">준비 중인 계산기</h2>
+      <p class="small muted">공식 기준을 확인하고 검증을 마친 순서대로 공개할게요.</p>
+      <ul>{cat.planned.map((p) => <li>{p}</li>)}</ul>
+    </section>
+  )}
+</div>
+<style>
+  .block { margin-top: var(--space-6); }
+  h2 { margin-bottom: var(--space-3); }
+  .grid { display: grid; gap: var(--space-3); grid-template-columns: 1fr; }
+  @media (min-width: 768px) { .grid { grid-template-columns: 1fr 1fr; } }
+</style>

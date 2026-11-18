@@ -1,0 +1,8 @@
+---
+import Button from './Button.astro';
+import Share2 from '../icons/Share2.astro';
+/** 링크 공유. Web Share API를 먼저 쓰고, 지원하지 않으면 링크를 복사한다(스크립트 처리). */
+interface Props { label?: string }
+const { label = '링크 공유' } = Astro.props;
+---
+<Button variant="secondary" data-share-link><Share2 />{label}</Button>

@@ -1,18 +1,82 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
-import ToolCard from '../components/ToolCard.astro';
-import { SITE_NAME, SITE_TAGLINE, TOOLS } from '../config';
+import ToolCard from '../components/ui/ToolCard.astro';
+import Section from '../components/ui/Section.astro';
+import { SITE_NAME, SITE_TAGLINE, SITE_URL, TOOLS, CATEGORIES, toolsOf } from '../config';
+
+const title = `${SITE_NAME} | 급여·세금·노동 계산기 모음`;
+const description =
+  '연봉 실수령액부터 세금, 퇴직금까지 헷갈리는 돈 계산을 쉽게 풀어 드려요. 회원가입 없이 바로 쓰고, 입력한 값은 내 브라우저 안에서만 계산해요.';
+
+const jsonLd = [
+  {
+    '@context': 'https://schema.org',
+    '@type': 'WebSite',
+    name: SITE_NAME,
+    alternateName: 'donsem',
+    url: new URL('/', SITE_URL).href,
+    inLanguage: 'ko',
+  },
+  {
+    '@context': 'https://schema.org',
+    '@type': 'Organization',
+    name: SITE_NAME,
+    url: new URL('/', SITE_URL).href,
+  },
+];
 ---
-<BaseLayout title={SITE_NAME} description={`${SITE_NAME}: ${SITE_TAGLINE}. 연봉 실수령액 계산기 등 생활에 필요한 계산을 회원가입 없이 바로 해보세요.`}>
-  <h1>{SITE_NAME}</h1>
-  <p class="lead">{SITE_TAGLINE}. 회원가입 없이, 입력한 값은 내 브라우저 안에서만 계산돼요.</p>
-  <h2 id="tools">도구 목록</h2>
-  <div class="tool-grid">
-    {TOOLS.map((t) => <ToolCard tool={t} />)}
-  </div>
-  <h2>이 사이트는 이렇게 만들어요</h2>
-  <p>
-    각 도구에는 사용법, 계산 방식, 예시, 자주 묻는 질문을 함께 적어 두었어요. 어떤 기준으로 숫자가 나왔는지 직접 확인할 수 있도록
-    요율과 기준 연도를 공개하고, 바뀌는 값은 확인하는 대로 갱신합니다.
-  </p>
+<BaseLayout title={title} rawTitle description={description} jsonLd={jsonLd}>
+  <header class="hero prose">
+    <h1>{SITE_TAGLINE}</h1>
+    <p class="lead">
+      월급이 실제로 얼마나 들어오는지, 세금은 얼마나 나가는지 숫자 하나만 넣고 바로 확인해 보세요. 회원가입은 필요 없고, 입력한 값은 내 브라우저 안에서만 계산돼요.
+    </p>
+  </header>
+
+  <Section id="tools" title="계산기" wide>
+    <div class="grid">{TOOLS.map((t) => <ToolCard tool={t} />)}</div>
+    <p class="small muted more"><a href="/tools/">전체 계산기 보기</a> · 새 계산기는 준비되는 대로 계속 추가해요.</p>
+  </Section>
+
+  <Section id="categories" title="분야별로 찾기" wide>
+    <div class="grid">
+      {CATEGORIES.map((c) => (
+        <a class="cat-card" href={`/${c.slug}/`}>
+          <strong>{c.name}</strong>
+          <span class="small muted">
+            {toolsOf(c.slug).length > 0 ? `계산기 ${toolsOf(c.slug).length}개 공개 · ` : ''}준비 중 {c.planned.length}개
+          </span>
+        </a>
+      ))}
+    </div>
+  </Section>
+
+  <Section id="how" title="돈셈은 이렇게 만들어요">
+    <p>
+      모든 계산기에는 사용법, 계산 방식, 예시, 자주 묻는 질문을 함께 적어 두었어요. 어떤 기준으로 숫자가 나왔는지 직접 따라가 볼 수 있어야 결과를 믿고 쓸 수 있다고 생각하기 때문이에요.
+    </p>
+    <p>
+      요율과 기준값은 국민연금공단, 국세청 같은 공공기관 자료를 기준으로 하고, 기준 연도와 확인일을 페이지에 공개해요. 공식 계산기와 같은 값을 넣어 비교하는 검증도 거치고요. 자세한 원칙은 <a href="/about/">돈셈 소개</a>에서 볼 수 있어요.
+    </p>
+    <p>
+      계산 결과는 참고용이에요. 급여 협상이나 세금 신고처럼 중요한 결정 앞에서는 공식 기관의 안내를 함께 확인해 주세요.
+    </p>
+  </Section>
 </BaseLayout>
+<style>
+  .hero { margin: var(--space-5) 0 var(--space-4); }
+  .lead { margin: var(--space-3) 0 0; color: var(--color-text-muted); font-size: var(--text-h3); line-height: 1.6; }
+  .grid { display: grid; gap: var(--space-3); grid-template-columns: 1fr; }
+  .more { margin-top: var(--space-3); }
+  .cat-card {
+    display: flex; flex-direction: column; gap: var(--space-1); padding: var(--space-4);
+    background: var(--color-surface); border: 1px solid var(--color-border); border-radius: var(--radius-md);
+    color: var(--color-text); text-decoration: none; min-height: var(--touch-min);
+  }
+  .cat-card:hover { border-color: var(--color-primary); background: var(--color-primary-soft); color: var(--color-text); }
+  .cat-card strong { font-size: var(--text-h3); }
+  @media (min-width: 768px) {
+    .grid { grid-template-columns: repeat(3, 1fr); }
+    h1 { font-size: var(--text-display); }
+  }
+</style>

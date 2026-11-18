@@ -1,0 +1,24 @@
+---
+import ExternalLink from '../icons/ExternalLink.astro';
+/** 출처 목록 + 기준일. 공공기관 원문 링크만 쓴다 (site-00 §3). */
+export interface Source { name: string; org: string; url: string; note?: string }
+interface Props { sources: Source[]; asOf: string }
+const { sources, asOf } = Astro.props;
+---
+<div class="sources">
+  <p class="small muted">기준일: <time datetime={asOf}>{asOf}</time> 확인</p>
+  <ul>
+    {sources.map((s) => (
+      <li>
+        <a href={s.url} target="_blank" rel="noopener noreferrer">{s.org} · {s.name}<ExternalLink /><span class="sr-only"> (새 창)</span></a>
+        {s.note && <span class="small muted"> — {s.note}</span>}
+      </li>
+    ))}
+  </ul>
+</div>
+<style>
+  .sources { margin-bottom: var(--space-4); }
+  .sources p { margin-bottom: var(--space-2); }
+  ul { margin: 0; padding-left: var(--space-5); }
+  a :global(svg) { margin-left: var(--space-1); }
+</style>

@@ -1,0 +1,259 @@
+---
+/**
+ * 디자인 시스템 쇼케이스 (site-03 §6). preview 빌드에서만 생성하고 noindex, sitemap 제외.
+ * 사용자 검수용이라 production 빌드에서는 getStaticPaths가 빈 목록을 돌려줘 페이지가 만들어지지 않는다.
+ */
+import { readFileSync } from 'node:fs';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import PageHeader from '../../components/ui/PageHeader.astro';
+import Section from '../../components/ui/Section.astro';
+import Button from '../../components/ui/Button.astro';
+import Field from '../../components/ui/Field.astro';
+import MoneyInput from '../../components/ui/MoneyInput.astro';
+import Chips from '../../components/ui/Chips.astro';
+import Stepper from '../../components/ui/Stepper.astro';
+import Segmented from '../../components/ui/Segmented.astro';
+import Details from '../../components/ui/Details.astro';
+import ResultHero from '../../components/ui/ResultHero.astro';
+import ResultTable from '../../components/ui/ResultTable.astro';
+import StickyResultBar from '../../components/ui/StickyResultBar.astro';
+import CopyButton from '../../components/ui/CopyButton.astro';
+import ShareButton from '../../components/ui/ShareButton.astro';
+import Toast from '../../components/ui/Toast.astro';
+import Steps from '../../components/ui/Steps.astro';
+import DataTable from '../../components/ui/DataTable.astro';
+import SourceList from '../../components/ui/SourceList.astro';
+import Notice from '../../components/ui/Notice.astro';
+import FaqList from '../../components/ui/FaqList.astro';
+import ChangeLog from '../../components/ui/ChangeLog.astro';
+import ToolCard from '../../components/ui/ToolCard.astro';
+import RelatedTools from '../../components/ui/RelatedTools.astro';
+import CategoryHub from '../../components/ui/CategoryHub.astro';
+import AdSlot from '../../components/ui/AdSlot.astro';
+import Breadcrumb from '../../components/ui/Breadcrumb.astro';
+import Plus from '../../components/icons/Plus.astro';
+import { TOOLS } from '../../config';
+import { IS_PRODUCTION } from '../../lib/env';
+
+export function getStaticPaths() {
+  return IS_PRODUCTION ? [] : [{ params: { slug: undefined } }];
+}
+
+// 토큰 값을 tokens.css에서 읽어 견본으로 보여 준다 (값의 단일 출처는 tokens.css).
+const css = readFileSync(`${process.cwd()}/src/styles/tokens.css`, 'utf8');
+const darkAt = css.indexOf('prefers-color-scheme: dark');
+const grab = (block: string) =>
+  Object.fromEntries([...block.matchAll(/--color-([a-z0-9-]+):\s*(#[0-9a-fA-F]{6})/g)].map((m) => [m[1], m[2]]));
+const light = grab(css.slice(0, darkAt));
+const dark = { ...light, ...grab(css.slice(darkAt)) };
+const colorNames = Object.keys(light);
+const usage: Record<string, string> = {
+  bg: '페이지 배경', surface: '카드·입력 영역', 'surface-2': '표 머리, 보조 면', text: '본문', 'text-muted': '보조 텍스트',
+  border: '구분선(장식)', 'border-strong': '입력칸 테두리', primary: '링크·버튼·결과 숫자', 'primary-hover': 'hover/active',
+  'primary-soft': '결과 카드·강조 배경', 'on-primary': 'primary 위 글자', danger: '오류', warning: '주의', info: '정보',
+};
+const typeScale = [
+  { token: 'display', label: '핵심 결과 숫자', sample: '2,924,353원', spec: '2.25rem / 800 / 1.2' },
+  { token: 'h1', label: '페이지 제목', sample: '연봉 실수령액 계산기', spec: '1.75rem / 700 / 1.3' },
+  { token: 'h2', label: '섹션 제목', sample: '계산 방식과 근거', spec: '1.375rem / 700 / 1.4' },
+  { token: 'h3', label: '소제목', sample: '소득세 계산 순서', spec: '1.125rem / 600 / 1.4' },
+  { token: 'body', label: '본문', sample: '연봉을 넣으면 매달 받는 돈을 알려드려요.', spec: '1rem / 400 / 1.7' },
+  { token: 'small', label: '힌트·캡션', sample: '식대처럼 세금이 붙지 않는 돈이에요.', spec: '0.875rem / 400 / 1.6' },
+];
+const spaces = [1, 2, 3, 4, 5, 6, 7, 8];
+const radii = [['sm', '8px · 입력·버튼'], ['md', '12px · 카드'], ['lg', '16px · 결과 카드'], ['full', '칩']];
+---
+<BaseLayout title="디자인 시스템" description="돈셈 디자인 토큰과 UI 컴포넌트를 한곳에서 확인하는 검수용 페이지예요. 미리보기에서만 열려요." breadcrumbs={[{ name: '디자인 시스템' }]} noindex>
+  <PageHeader title="디자인 시스템" description="미리보기 전용 검수 페이지예요. 색은 기기 설정(라이트/다크)을 따라가고, 아래 견본은 두 값을 함께 보여 줘요. 입력 동작 데모는 /salary/에서 확인해요." />
+  <nav class="toc small" aria-label="이 페이지의 목차">
+    <a href="#colors">색</a><a href="#type">타이포</a><a href="#space">간격·모양</a><a href="#buttons">버튼</a><a href="#inputs">입력</a><a href="#results">결과</a><a href="#content">콘텐츠</a><a href="#nav">탐색·광고</a>
+  </nav>
+
+  <Section id="colors" title="색 토큰" wide>
+    <p class="muted prose">왼쪽이 라이트, 오른쪽이 다크 값이에요. 컴포넌트에서는 이름(토큰)으로만 써요.</p>
+    <ul class="swatches">
+      {colorNames.map((n) => (
+        <li>
+          <div class="pair" aria-hidden="true">
+            <span class="chipcolor" style={`background:${light[n]}`}></span>
+            <span class="chipcolor" style={`background:${dark[n]}`}></span>
+          </div>
+          <div><code>--color-{n}</code><br /><span class="small muted">{usage[n]} · {light[n]} / {dark[n]}</span></div>
+        </li>
+      ))}
+    </ul>
+    <h3>현재 테마에서 보기</h3>
+    <div class="theme-sample">
+      <p>본문 텍스트 <span class="muted">보조 텍스트</span> <a href="#colors">링크</a></p>
+      <p class="primary-soft-box">primary-soft 배경 위 <strong>강조 텍스트</strong></p>
+      <p><span class="d">오류 danger</span> · <span class="w">주의 warning</span> · <span class="i">정보 info</span></p>
+    </div>
+  </Section>
+
+  <Section id="type" title="타이포그래피" wide>
+    <p class="muted prose">글꼴은 Pretendard 가변 폰트(서브셋, font-display: swap)이고 숫자에는 tabular-nums를 써요.</p>
+    <ul class="types">
+      {typeScale.map((t) => (
+        <li>
+          <span class="small muted">--text-{t.token} · {t.spec} · {t.label}</span>
+          <span class={`t-${t.token}`}>{t.sample}</span>
+        </li>
+      ))}
+    </ul>
+    <p class="num">tabular-nums: 1,111,111 / 8,888,888 (자릿수가 맞춰져요)</p>
+  </Section>
+
+  <Section id="space" title="간격·모양·레이아웃" wide>
+    <ul class="spaces">
+      {spaces.map((n) => (
+        <li><code>--space-{n}</code><span class="bar" style={`width:var(--space-${n})`}></span></li>
+      ))}
+    </ul>
+    <ul class="radii">
+      {radii.map(([n, d]) => <li class={`r-${n}`}><code>--radius-{n}</code><span class="small muted">{d}</span></li>)}
+    </ul>
+    <p class="small muted">그림자는 하단 고정 결과바 한 종류(<code>--shadow-sticky</code>)만 써요. 본문 폭 720px, 계산기 폭 960px, 좌우 여백 16px, 터치 영역 44×44px 이상이에요.</p>
+  </Section>
+
+  <Section id="buttons" title="버튼" wide>
+    <div class="row">
+      <Button>Primary</Button>
+      <Button variant="secondary">Secondary</Button>
+      <Button variant="ghost">Ghost</Button>
+    </div>
+    <div class="row">
+      <Button size="sm">Primary sm</Button>
+      <Button variant="secondary" size="sm">Secondary sm</Button>
+      <Button variant="ghost" size="sm"><Plus />Ghost sm</Button>
+      <Button href="/salary/" variant="secondary">링크 버튼</Button>
+    </div>
+    <div class="row"><CopyButton /><ShareButton /></div>
+  </Section>
+
+  <Section id="inputs" title="입력" wide>
+    <div class="grid2">
+      <div class="panel">
+        <MoneyInput id="ds-money" label="MoneyInput" value={40000000} hint="콤마·단위·한글 읽기가 붙는 금액 입력이에요.">
+          <Chips target="ds-money" items={[{ label: '+100만', add: 1000000 }, { label: '+1,000만', add: 10000000 }]} />
+        </MoneyInput>
+        <Stepper id="ds-step" label="Stepper" value={2} min={1} max={5} hint="정수 개수는 −/+로 바꿔요." />
+        <Segmented name="ds-seg" legend="Segmented (2~4개 선택지)" value="b" options={[{ value: 'a', label: '월' }, { value: 'b', label: '연' }, { value: 'c', label: '시급' }]} />
+        <Field id="ds-err" label="Field (오류 상태)" hint="힌트 한 줄은 이렇게 보여요.">
+          <input id="ds-err" type="text" value="-5" aria-invalid="true" aria-describedby="ds-err-hint ds-err-error" class="plain-input" />
+        </Field>
+      </div>
+      <div class="panel">
+        <Details summary="Details (상세 옵션 접기)" open>
+          <p class="small muted">선택 항목은 접기 안에 둬요. 키보드로 열고 닫을 수 있어요.</p>
+        </Details>
+        <Details summary="닫힌 Details"><p>내용</p></Details>
+      </div>
+    </div>
+  </Section>
+
+  <Section id="results" title="결과" wide>
+    <div class="grid2">
+      <ResultHero label="ResultHero · 월 예상 실수령액" value="2,924,353원" caption="세전 월급 3,333,333원 기준" subs={[{ label: '연 실수령액', value: '35,092,236원' }, { label: '월 공제 합계', value: '408,980원' }]}>
+        <p class="small muted">참고용이에요. 실제 급여와 다를 수 있어요.</p>
+      </ResultHero>
+      <ResultTable
+        caption="ResultTable · 월 기준 (2026년 기준)"
+        rows={[{ key: 'a', label: '국민연금', amount: '148,830원', ratio: '4.5%' }, { key: 'b', label: '건강보험', amount: '112,640원', ratio: '3.4%' }]}
+        totals={[{ key: 't', label: '월 실수령액', amount: '2,924,353원', ratio: '87.7%' }]}
+      />
+    </div>
+    <h3>오류 상태의 ResultHero</h3>
+    <div class="grid2"><div data-demo-error>
+      <ResultHero label="월 예상 실수령액" value="-" caption="" />
+    </div></div>
+    <h3>StickyResultBar · Toast (모바일 폭에서 보여요)</h3>
+    <div class="demo-fixed"><StickyResultBar label="월 실수령액" value="2,924,353원" /></div>
+    <div class="demo-fixed"><Toast /></div>
+  </Section>
+
+  <Section id="content" title="콘텐츠" wide>
+    <div class="grid2">
+      <div>
+        <h3>Steps</h3>
+        <Steps items={[{ title: '연봉을 넣어요', body: '세전 금액을 입력해요.' }, { title: '결과를 확인해요', body: '항목별 공제 내역도 함께 봐요.' }]} />
+        <h3>Notice</h3>
+        <Notice>정보 안내는 이렇게 보여요.</Notice>
+        <Notice variant="warning" title="참고용 안내">주의가 필요한 안내는 이렇게 보여요.</Notice>
+      </div>
+      <div>
+        <h3>DataTable</h3>
+        <DataTable caption="연봉별 월 실수령액" columns={[{ key: 'a', label: '연봉' }, { key: 'b', label: '월 실수령액', align: 'right' }]} rows={[{ a: '3,000만 원', b: '2,2xx,xxx원' }, { a: '4,000만 원', b: '2,924,353원' }]} />
+        <h3>SourceList</h3>
+        <SourceList asOf="2026-11-18" sources={[{ org: '국세청', name: '근로소득 간이세액표', url: 'https://www.nts.go.kr/', note: '소득세' }]} />
+      </div>
+    </div>
+    <h3>FaqList</h3>
+    <FaqList items={[{ q: '질문은 이렇게 보여요.', a: '답변은 펼치면 나와요.' }, { q: '두 번째 질문이에요.', a: '키보드로도 열 수 있어요.' }]} />
+    <h3>ChangeLog</h3>
+    <ChangeLog items={[{ date: '2026-11-18', text: '최초 공개.' }]} />
+  </Section>
+
+  <Section id="nav" title="탐색·광고" wide>
+    <h3>Breadcrumb</h3>
+    <Breadcrumb items={[{ name: '홈', href: '/' }, { name: '급여', href: '/pay/' }, { name: '연봉 실수령액 계산기' }]} />
+    <h3>ToolCard · RelatedTools</h3>
+    <div class="grid2"><ToolCard tool={TOOLS[0]} /></div>
+    <RelatedTools category="pay" current="none" />
+    <h3>CategoryHub (세금: 도구 없음 + 준비 중 목록)</h3>
+    <CategoryHub category="tax"><p>카테고리 소개 문단이 들어가요.</p></CategoryHub>
+    <h3>AdSlot (미리보기: 회색 빈 자리 + 광고 라벨, 운영 빌드에서는 렌더링 없음)</h3>
+    <AdSlot />
+  </Section>
+</BaseLayout>
+<script is:inline>
+  // 데모용 상태 표시 (실제 동작은 /salary/ 스크립트가 담당)
+  var err = document.getElementById('ds-err-error');
+  if (err) { err.hidden = false; err.textContent = '연봉은 0보다 커야 해요.'; }
+  var box = document.querySelector('[data-demo-error]');
+  if (box) {
+    box.querySelector('[data-hero]').dataset.state = 'error';
+    var he = box.querySelector('[data-result-error]');
+    he.hidden = false; he.textContent = '연봉을 입력해 주세요.';
+  }
+  var bar = document.querySelector('[data-sticky-bar]'); if (bar) bar.classList.add('show');
+  var toast = document.querySelector('[data-toast]'); if (toast) { toast.textContent = '결과를 복사했어요'; toast.classList.add('show'); }
+</script>
+<style>
+  .toc { display: flex; flex-wrap: wrap; gap: var(--space-2) var(--space-4); margin-bottom: var(--space-4); }
+  code { font-size: var(--text-small); background: var(--color-surface-2); padding: 0 var(--space-1); border-radius: var(--radius-sm); }
+  .swatches { list-style: none; margin: 0 0 var(--space-5); padding: 0; display: grid; gap: var(--space-3); grid-template-columns: 1fr; }
+  .swatches li { display: flex; align-items: center; gap: var(--space-3); margin: 0; background: var(--color-surface); border: 1px solid var(--color-border); border-radius: var(--radius-md); padding: var(--space-3); }
+  .pair { display: flex; flex: none; border: 1px solid var(--color-border-strong); border-radius: var(--radius-sm); overflow: hidden; }
+  .chipcolor { width: var(--space-6); height: var(--space-7); display: block; }
+  .theme-sample { background: var(--color-surface); border: 1px solid var(--color-border); border-radius: var(--radius-md); padding: var(--space-4); }
+  .primary-soft-box { background: var(--color-primary-soft); border-radius: var(--radius-lg); padding: var(--space-4); }
+  .d { color: var(--color-danger); } .w { color: var(--color-warning); } .i { color: var(--color-info); }
+  .types { list-style: none; margin: 0 0 var(--space-4); padding: 0; }
+  .types li { display: flex; flex-direction: column; gap: var(--space-1); padding: var(--space-3) 0; border-bottom: 1px solid var(--color-border); margin: 0; }
+  .t-display { font-size: var(--text-display); font-weight: var(--text-display-weight); line-height: var(--text-display-lh); color: var(--color-primary); font-variant-numeric: tabular-nums; }
+  .t-h1 { font-size: var(--text-h1); font-weight: var(--text-h1-weight); line-height: var(--text-h1-lh); }
+  .t-h2 { font-size: var(--text-h2); font-weight: var(--text-h2-weight); line-height: var(--text-h2-lh); }
+  .t-h3 { font-size: var(--text-h3); font-weight: var(--text-h3-weight); line-height: var(--text-h3-lh); }
+  .t-body { font-size: var(--text-body); line-height: var(--text-body-lh); }
+  .t-small { font-size: var(--text-small); line-height: var(--text-small-lh); }
+  .spaces { list-style: none; margin: 0 0 var(--space-4); padding: 0; }
+  .spaces li { display: flex; align-items: center; gap: var(--space-3); margin: 0 0 var(--space-2); }
+  .spaces code { min-width: 6rem; }
+  .bar { display: block; height: var(--space-4); background: var(--color-primary); border-radius: var(--radius-sm); }
+  .radii { list-style: none; margin: 0 0 var(--space-4); padding: 0; display: flex; flex-wrap: wrap; gap: var(--space-3); }
+  .radii li { display: flex; flex-direction: column; gap: var(--space-1); margin: 0; padding: var(--space-4); background: var(--color-primary-soft); border: 1px solid var(--color-primary); min-width: 8rem; }
+  .r-sm { border-radius: var(--radius-sm); } .r-md { border-radius: var(--radius-md); } .r-lg { border-radius: var(--radius-lg); } .r-full { border-radius: var(--radius-full); }
+  .row { display: flex; flex-wrap: wrap; gap: var(--space-3); margin-bottom: var(--space-4); align-items: center; }
+  .grid2 { display: grid; gap: var(--space-4); grid-template-columns: 1fr; margin-bottom: var(--space-4); }
+  .panel { background: var(--color-surface); border: 1px solid var(--color-border); border-radius: var(--radius-lg); padding: var(--space-4); }
+  .plain-input { width: 100%; min-height: var(--touch-min); padding: 0 var(--space-3); background: var(--color-surface); border: 2px solid var(--color-danger); border-radius: var(--radius-sm); font-size: max(1rem, var(--text-body)); }
+  /* transform이 있는 부모 안에서는 position: fixed가 그 부모를 기준으로 잡힌다 */
+  .demo-fixed { position: relative; transform: translateZ(0); height: calc(var(--touch-min) * 2); margin-bottom: var(--space-3); border: 1px dashed var(--color-border-strong); border-radius: var(--radius-md); overflow: hidden; }
+  .demo-fixed :global(.bar), .demo-fixed :global(.toast) { position: absolute; }
+  .demo-fixed :global(.toast) { bottom: var(--space-3); }
+  @media (min-width: 768px) {
+    .swatches { grid-template-columns: 1fr 1fr; }
+    .grid2 { grid-template-columns: 1fr 1fr; }
+    .demo-fixed :global(.bar) { display: flex; }
+  }
+</style>

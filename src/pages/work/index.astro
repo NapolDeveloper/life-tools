@@ -1,0 +1,16 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import PageHeader from '../../components/ui/PageHeader.astro';
+import CategoryHub from '../../components/ui/CategoryHub.astro';
+import { getCategory } from '../../config';
+
+const cat = getCategory('work');
+---
+<BaseLayout title={cat.title} description={cat.description} breadcrumbs={[{ name: cat.name }]}>
+  <PageHeader title={cat.title} />
+  <CategoryHub category="work">
+    <p>퇴직금, 실업급여, 연차는 모두 일한 기간과 평균임금 같은 기준으로 계산돼요. 회사에 직접 묻기는 애매하지만 내 권리가 맞게 적용되는지 확인하고 싶을 때 쓰는 계산기를 이곳에 모아 둘 거예요.</p>
+    <p>노동·고용 분야는 법령과 고용노동부 해석이 기준이라 근거 확인이 특히 중요해요. 그래서 계산 방식에 근거 조문과 출처를 함께 적을 계획이에요.</p>
+    <p>아직 공개한 계산기는 없어요. 준비 중인 목록을 아래에서 확인하고, 필요한 계산이 있다면 <a href="/contact/">문의 페이지</a>로 알려 주세요. 수요가 많은 계산기부터 만들게요.</p>
+  </CategoryHub>
+</BaseLayout>

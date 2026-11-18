@@ -1,0 +1,35 @@
+---
+import Minus from '../icons/Minus.astro';
+import Plus from '../icons/Plus.astro';
+/** 정수 개수 입력 (−/+). 값 칸은 읽기 전용이며 ↑↓ 키로도 바꿀 수 있다. */
+interface Props { id: string; label: string; value: number; min?: number; max?: number; hint?: string }
+const { id, label, value, min = 0, max = 20, hint } = Astro.props;
+---
+<div class="field stepper" data-stepper data-min={min} data-max={max}>
+  <label for={id}>{label}</label>
+  <div class="ctl" role="group" aria-label={label}>
+    <button type="button" class="step" data-step="-1" aria-label={`${label} 줄이기`} disabled={value <= min}><Minus /></button>
+    <input id={id} name={id} type="text" inputmode="numeric" readonly value={value} aria-describedby={`${hint ? `${id}-hint ` : ''}${id}-error`} />
+    <button type="button" class="step" data-step="1" aria-label={`${label} 늘리기`} disabled={value >= max}><Plus /></button>
+  </div>
+  {hint && <p class="hint" id={`${id}-hint`}>{hint}</p>}
+  <p class="error" id={`${id}-error`} hidden></p>
+</div>
+<style>
+  .field { margin-bottom: var(--space-4); }
+  label { display: block; font-weight: 600; margin-bottom: var(--space-1); }
+  .ctl { display: inline-flex; align-items: stretch; border: 1px solid var(--color-border-strong); border-radius: var(--radius-sm); background: var(--color-surface); overflow: hidden; }
+  .step {
+    width: var(--touch-min); min-height: var(--touch-min); display: inline-flex; align-items: center; justify-content: center;
+    background: var(--color-surface); border: 0; color: var(--color-primary); cursor: pointer;
+  }
+  .step:hover:not(:disabled) { background: var(--color-primary-soft); }
+  .step:disabled { color: var(--color-text-muted); cursor: not-allowed; opacity: 0.6; }
+  input {
+    width: calc(var(--touch-min) + var(--space-3)); text-align: center; border: 0;
+    border-inline: 1px solid var(--color-border); background: var(--color-surface); color: var(--color-text);
+    font-size: max(1rem, var(--text-body)); font-weight: 700; font-variant-numeric: tabular-nums;
+  }
+  .hint { margin: var(--space-1) 0 0; font-size: var(--text-small); line-height: var(--text-small-lh); color: var(--color-text-muted); }
+  .error { margin: var(--space-1) 0 0; font-size: var(--text-small); color: var(--color-danger); font-weight: 600; }
+</style>

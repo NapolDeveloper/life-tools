@@ -1,0 +1,8 @@
+---
+import Button from './Button.astro';
+import Copy from '../icons/Copy.astro';
+/** 결과 복사. 복사할 문구는 스크립트가 data-copy-result 버튼 클릭 시 만들어 클립보드에 넣는다. */
+interface Props { label?: string }
+const { label = '복사하기' } = Astro.props;
+---
+<Button variant="secondary" data-copy-result><Copy />{label}</Button>

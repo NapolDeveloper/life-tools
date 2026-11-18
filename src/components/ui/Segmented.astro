@@ -1,0 +1,32 @@
+---
+/** 2~4개 선택지 세그먼트 (라디오 그룹). JS 없이도 동작한다. */
+export interface SegOption { value: string; label: string }
+interface Props { name: string; legend: string; options: SegOption[]; value: string }
+const { name, legend, options, value } = Astro.props;
+---
+<fieldset class="segmented">
+  <legend>{legend}</legend>
+  <div class="row">
+    {options.map((o) => (
+      <label>
+        <input type="radio" name={name} value={o.value} checked={o.value === value} />
+        <span>{o.label}</span>
+      </label>
+    ))}
+  </div>
+</fieldset>
+<style>
+  .segmented { border: 0; padding: 0; margin: 0 0 var(--space-4); min-width: 0; }
+  legend { font-weight: 600; margin-bottom: var(--space-1); padding: 0; }
+  .row { display: inline-flex; border: 1px solid var(--color-border-strong); border-radius: var(--radius-sm); overflow: hidden; background: var(--color-surface); }
+  label { position: relative; display: block; }
+  input { position: absolute; inset: 0; opacity: 0; margin: 0; cursor: pointer; }
+  span {
+    display: inline-flex; align-items: center; justify-content: center; min-height: var(--touch-min); padding: 0 var(--space-4);
+    font-weight: 600; color: var(--color-text); border-left: 1px solid var(--color-border);
+  }
+  label:first-child span { border-left: 0; }
+  input:checked + span { background: var(--color-primary); color: var(--color-on-primary); }
+  input:focus-visible + span { outline: 3px solid var(--color-primary); outline-offset: -3px; }
+  input:checked:focus-visible + span { outline-color: var(--color-on-primary); }
+</style>

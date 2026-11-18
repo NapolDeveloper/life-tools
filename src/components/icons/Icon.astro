@@ -1,0 +1,25 @@
+---
+/** Lucide(ISC) 아이콘 공통 래퍼. 필요한 아이콘만 개별 컴포넌트로 만들어 쓴다. 장식용이므로 기본 aria-hidden. */
+interface Props {
+  label?: string;
+}
+const { label } = Astro.props;
+---
+<svg
+  xmlns="http://www.w3.org/2000/svg"
+  viewBox="0 0 24 24"
+  width="1.25em"
+  height="1.25em"
+  fill="none"
+  stroke="currentColor"
+  stroke-width="2"
+  stroke-linecap="round"
+  stroke-linejoin="round"
+  class="icon"
+  aria-hidden={label ? undefined : 'true'}
+  role={label ? 'img' : undefined}
+  aria-label={label}
+  focusable="false"><slot /></svg>
+<style>
+  .icon { flex: none; vertical-align: -0.2em; }
+</style>

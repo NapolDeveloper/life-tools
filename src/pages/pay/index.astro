@@ -1,0 +1,16 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import PageHeader from '../../components/ui/PageHeader.astro';
+import CategoryHub from '../../components/ui/CategoryHub.astro';
+import { getCategory } from '../../config';
+
+const cat = getCategory('pay');
+---
+<BaseLayout title={cat.title} description={cat.description} breadcrumbs={[{ name: cat.name }]}>
+  <PageHeader title={cat.title} />
+  <CategoryHub category="pay">
+    <p>월급은 계약서에 적힌 금액과 통장에 들어오는 금액이 달라요. 국민연금, 건강보험, 고용보험 같은 4대보험료와 소득세가 먼저 빠져나가기 때문이에요. 이 분야에서는 그 차이를 숫자로 바로 확인할 수 있는 계산기를 모아 둬요.</p>
+    <p>연봉 협상이나 이직을 앞두고 있다면 세전 금액보다 실수령액으로 비교해 보는 게 좋아요. 시급으로 일한다면 주휴수당이 붙는지에 따라 한 달 벌이가 꽤 달라지니, 그 계산기도 곧 더할 예정이에요.</p>
+    <p>모든 계산기는 요율과 기준 연도, 출처를 페이지 안에 공개해요. 결과는 참고용이라 실제 급여명세서와 함께 봐 주세요.</p>
+  </CategoryHub>
+</BaseLayout>

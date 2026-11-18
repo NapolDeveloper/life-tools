@@ -1,0 +1,17 @@
+---
+/** 짧은 알림(2초). 스크립트가 data-toast의 텍스트를 바꾸고 .show를 붙였다 뗀다. */
+---
+<div class="toast" data-toast role="status" aria-live="polite"></div>
+<style>
+  .toast {
+    position: fixed; left: 50%; bottom: calc(var(--touch-min) + var(--space-7)); z-index: 30;
+    transform: translate(-50%, var(--space-3)); opacity: 0; pointer-events: none;
+    background: var(--color-text); color: var(--color-bg);
+    padding: var(--space-3) var(--space-4); border-radius: var(--radius-full);
+    font-size: var(--text-small); font-weight: 600; max-width: calc(100vw - var(--space-6)); text-align: center;
+    transition: opacity var(--duration-fast), transform var(--duration-fast);
+  }
+  .toast.show { opacity: 1; transform: translate(-50%, 0); }
+  .toast:empty { display: none; }
+  @media (min-width: 768px) { .toast { bottom: var(--space-6); } }
+</style>

@@ -1,21 +1,53 @@
 ---
-import '../styles/global.css';
-import Header from '../components/Header.astro';
-import Footer from '../components/Footer.astro';
-import AdSlot from '../components/AdSlot.astro';
-import { SITE_NAME, SITE_URL } from '../config';
+import '../styles/fonts.css';
+import '../styles/tokens.css';
+import '../styles/base.css';
+import SiteHeader from '../components/ui/SiteHeader.astro';
+import SiteFooter from '../components/ui/SiteFooter.astro';
+import Breadcrumb, { type Crumb } from '../components/ui/Breadcrumb.astro';
+import { SITE_NAME, SITE_URL, VERIFICATION, GA4_ID } from '../config';
+import { IS_PRODUCTION } from '../lib/env';
+import { pageOf } from '../lib/pages';
+import { PRELOAD_FONTS } from '../lib/fonts';
 
 interface Props {
+  /** 브랜드를 뺀 페이지 제목 (핵심 키워드 앞, 한글 약 30자 이내). 브랜드는 자동으로 붙는다. */
   title: string;
+  /** 한글 80~120자 */
   description: string;
-  /** JSON-LD 객체 목록 (선택) */
+  /** 홈처럼 title 전체를 직접 쓰는 경우 true (브랜드 접미사 생략) */
+  rawTitle?: boolean;
+  /** 홈 > ... > 현재 페이지. 홈은 자동으로 앞에 붙는다. 마지막 항목은 현재 페이지(href 생략). */
+  breadcrumbs?: Crumb[];
   jsonLd?: object[];
-  /** 기본값 true. 빈 광고 슬롯 표시 여부 */
-  adSlots?: boolean;
+  /** 환경과 무관하게 noindex (404, design-system) */
+  noindex?: boolean;
+  /** OG 이미지 파일 이름 (/og/{slug}.png). 생략하면 pages.ts에서 경로로 찾고, 없으면 home */
+  ogSlug?: string;
 }
-const { title, description, jsonLd = [], adSlots = true } = Astro.props;
-const fullTitle = title === SITE_NAME ? title : `${title} | ${SITE_NAME}`;
-const canonical = new URL(Astro.url.pathname, SITE_URL).href;
+const { title, description, rawTitle = false, breadcrumbs = [], jsonLd = [], noindex = false, ogSlug } = Astro.props;
+
+const fullTitle = rawTitle ? title : `${title} | ${SITE_NAME}`;
+const pathname = Astro.url.pathname;
+const canonical = new URL(pathname, SITE_URL).href;
+const robots = !IS_PRODUCTION || noindex ? 'noindex, follow' : 'index, follow';
+const ogImage = new URL(`/og/${ogSlug ?? pageOf(pathname)?.ogSlug ?? 'home'}.png`, SITE_URL).href;
+
+const crumbs: Crumb[] = breadcrumbs.length ? [{ name: '홈', href: '/' }, ...breadcrumbs] : [];
+const breadcrumbLd = crumbs.length
+  ? {
+      '@context': 'https://schema.org',
+      '@type': 'BreadcrumbList',
+      itemListElement: crumbs.map((c, i) => ({
+        '@type': 'ListItem',
+        position: i + 1,
+        name: c.name,
+        item: new URL(c.href ?? pathname, SITE_URL).href,
+      })),
+    }
+  : null;
+const allLd = [...(breadcrumbLd ? [breadcrumbLd] : []), ...jsonLd];
+const useGa = IS_PRODUCTION && GA4_ID !== '';
 ---
 <!doctype html>
 <html lang="ko">
@@ -24,26 +56,38 @@ const canonical = new URL(Astro.url.pathname, SITE_URL).href;
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>{fullTitle}</title>
     <meta name="description" content={description} />
+    <meta name="robots" content={robots} />
     <link rel="canonical" href={canonical} />
     <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <link rel="alternate" type="application/rss+xml" title={`${SITE_NAME} 새 소식`} href="/rss.xml" />
+    {PRELOAD_FONTS.map((f) => <link rel="preload" href={`/fonts/pretendard/${f}`} as="font" type="font/woff2" crossorigin />)}
+    {VERIFICATION.google && <meta name="google-site-verification" content={VERIFICATION.google} />}
+    {VERIFICATION.naver && <meta name="naver-site-verification" content={VERIFICATION.naver} />}
+    {VERIFICATION.bing && <meta name="msvalidate.01" content={VERIFICATION.bing} />}
     <meta property="og:type" content="website" />
     <meta property="og:locale" content="ko_KR" />
     <meta property="og:site_name" content={SITE_NAME} />
     <meta property="og:title" content={fullTitle} />
     <meta property="og:description" content={description} />
     <meta property="og:url" content={canonical} />
-    <meta name="twitter:card" content="summary" />
-    {jsonLd.map((d) => <script type="application/ld+json" set:html={JSON.stringify(d)} />)}
+    <meta property="og:image" content={ogImage} />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content={fullTitle} />
+    <meta name="twitter:description" content={description} />
+    <meta name="twitter:image" content={ogImage} />
+    {allLd.map((d) => <script type="application/ld+json" set:html={JSON.stringify(d)} />)}
+    {useGa && <script async src={`https://www.googletagmanager.com/gtag/js?id=${GA4_ID}`}></script>}
+    {useGa && <script is:inline set:html={`window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js',new Date());gtag('config','${GA4_ID}');`} />}
   </head>
   <body>
-    <Header />
-    {adSlots && <div class="wrap"><AdSlot position="top" /></div>}
-    <main>
-      <div class="wrap">
-        <slot />
-      </div>
+    <a class="skip-link" href="#main">본문 바로가기</a>
+    <SiteHeader />
+    <main id="main">
+      {crumbs.length > 0 && <Breadcrumb items={crumbs} />}
+      <slot />
     </main>
-    {adSlots && <div class="wrap"><AdSlot position="bottom" /></div>}
-    <Footer />
+    <SiteFooter />
   </body>
 </html>

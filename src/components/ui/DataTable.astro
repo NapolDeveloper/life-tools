@@ -1,0 +1,36 @@
+---
+/** 일반 데이터 표. caption·th scope 필수, 모바일에서는 래퍼 안에서만 가로 스크롤. */
+export interface Column { key: string; label: string; align?: 'left' | 'right' }
+interface Props { caption: string; columns: Column[]; rows: Record<string, string>[]; rowHeader?: boolean }
+const { caption, columns, rows, rowHeader = true } = Astro.props;
+---
+<div class="table-scroll" tabindex="0" role="region" aria-label={`${caption} (가로로 스크롤할 수 있어요)`}>
+  <table>
+    <caption>{caption}</caption>
+    <thead>
+      <tr>{columns.map((c) => <th scope="col" class:list={{ r: c.align === 'right' }}>{c.label}</th>)}</tr>
+    </thead>
+    <tbody>
+      {rows.map((row) => (
+        <tr>
+          {columns.map((c, i) =>
+            i === 0 && rowHeader ? (
+              <th scope="row">{row[c.key]}</th>
+            ) : (
+              <td class:list={['num', { r: c.align === 'right' }]}>{row[c.key]}</td>
+            ),
+          )}
+        </tr>
+      ))}
+    </tbody>
+  </table>
+</div>
+<style>
+  .table-scroll { overflow-x: auto; border: 1px solid var(--color-border); border-radius: var(--radius-md); background: var(--color-surface); margin-bottom: var(--space-4); }
+  table { width: 100%; border-collapse: collapse; font-size: var(--text-small); min-width: 20rem; }
+  caption { text-align: left; padding: var(--space-3) var(--space-4); color: var(--color-text-muted); caption-side: top; }
+  th, td { padding: var(--space-3) var(--space-4); border-top: 1px solid var(--color-border); text-align: left; vertical-align: top; }
+  thead th { background: var(--color-surface-2); font-weight: 600; }
+  tbody th { font-weight: 600; }
+  .r { text-align: right; }
+</style>

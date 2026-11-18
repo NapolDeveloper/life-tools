@@ -1,0 +1,46 @@
+---
+/**
+ * 핵심 결과 카드: 큰 숫자 1개 + 보조 숫자 1~2개. 값이 바뀌면 aria-live="polite"로 알린다.
+ * data-out 속성은 계산기 스크립트가 값을 갱신하는 자리다.
+ */
+export interface HeroSub { label: string; value: string; out?: string }
+interface Props { label: string; value: string; out?: string; caption?: string; captionOut?: string; subs?: HeroSub[] }
+const { label, value, out = 'hero', caption, captionOut, subs = [] } = Astro.props;
+---
+<section class="hero" aria-label="계산 결과" data-hero>
+  <p class="label">{label}</p>
+  <div class="live" aria-live="polite" aria-atomic="true">
+    <p class="value num" data-out={out}>{value}</p>
+    <p class="error" data-result-error hidden></p>
+  </div>
+  {caption && <p class="caption num" data-out={captionOut}>{caption}</p>}
+  {subs.length > 0 && (
+    <dl class="subs">
+      {subs.map((s) => (
+        <div>
+          <dt>{s.label}</dt>
+          <dd class="num" data-out={s.out}>{s.value}</dd>
+        </div>
+      ))}
+    </dl>
+  )}
+  <slot />
+</section>
+<style>
+  .hero { background: var(--color-primary-soft); border-radius: var(--radius-lg); padding: var(--space-5) var(--space-4); }
+  .label { margin: 0 0 var(--space-1); font-weight: 600; color: var(--color-text); }
+  .value {
+    margin: 0; font-size: var(--text-display); font-weight: var(--text-display-weight); line-height: var(--text-display-lh);
+    color: var(--color-primary); word-break: keep-all; overflow-wrap: anywhere;
+  }
+  .value.flash { animation: flash var(--duration-base) ease-out; }
+  .error { margin: 0; color: var(--color-danger); font-weight: 700; }
+  .caption { margin: var(--space-1) 0 var(--space-3); font-size: var(--text-small); color: var(--color-text-muted); }
+  .subs { display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-3); margin: var(--space-4) 0 0; padding-top: var(--space-4); border-top: 1px solid var(--color-border); }
+  dt { font-size: var(--text-small); color: var(--color-text-muted); }
+  dd { margin: 0; font-weight: 700; font-size: var(--text-h3); }
+  dd.flash { animation: flash var(--duration-base) ease-out; }
+  @keyframes flash { from { background: var(--color-surface); } to { background: transparent; } }
+  .hero[data-state='error'] .value, .hero[data-state='error'] .caption, .hero[data-state='error'] .subs { display: none; }
+  @media (prefers-reduced-motion: reduce) { .value.flash, dd.flash { animation: none; } }
+</style>
